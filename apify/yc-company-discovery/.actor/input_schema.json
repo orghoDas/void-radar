@@ -1,0 +1,72 @@
+{
+  "title": "YC Company Discovery Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "maxItems": {
+      "title": "Maximum records",
+      "type": "integer",
+      "description": "Maximum number of standardized company records to output.",
+      "default": 50,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "minEmployees": {
+      "title": "Minimum employee count",
+      "type": "integer",
+      "description": "Filters toward Void's mid-to-large company ICP. Set to 0 to disable.",
+      "default": 50,
+      "minimum": 0
+    },
+    "regions": {
+      "title": "Target regions",
+      "type": "array",
+      "description": "Case-insensitive location fragments to keep.",
+      "editor": "stringList",
+      "default": [
+        "United States",
+        "USA",
+        "US",
+        "United Kingdom",
+        "UK",
+        "England",
+        "Ireland",
+        "Germany",
+        "France",
+        "Netherlands",
+        "Spain",
+        "Italy",
+        "Sweden",
+        "Norway",
+        "Denmark",
+        "Finland",
+        "Poland",
+        "Portugal",
+        "Belgium",
+        "Switzerland",
+        "Austria",
+        "Europe"
+      ]
+    },
+    "includeUnknownLocation": {
+      "title": "Include unknown locations",
+      "type": "boolean",
+      "description": "Keep companies with missing location data.",
+      "default": false
+    },
+    "sourceUrl": {
+      "title": "Structured source URL",
+      "type": "string",
+      "description": "Public structured YC company feed used by the actor.",
+      "default": "https://yc-oss.github.io/api/companies/all.json"
+    },
+    "startOffset": {
+      "title": "Start offset",
+      "type": "integer",
+      "description": "Zero-based source offset for manual resume or sampling.",
+      "default": 0,
+      "minimum": 0
+    }
+  },
+  "required": []
+}

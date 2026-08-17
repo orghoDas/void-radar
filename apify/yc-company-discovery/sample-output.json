@@ -1,0 +1,27 @@
+[
+  {
+    "source": "y_combinator",
+    "source_url": "https://www.ycombinator.com/companies/example-ai",
+    "source_company_id": "example-ai",
+    "company_name": "Example AI",
+    "website": "https://example.ai",
+    "location": "New York, NY, USA",
+    "industry": "B2B SaaS",
+    "batch": "S24",
+    "stage": "Active",
+    "status": "Active",
+    "employee_count": 75,
+    "description": "AI workflow platform for operations teams.",
+    "tags": ["b2b", "saas", "ai"],
+    "founders": [
+      {"name": "Jane Founder"}
+    ],
+    "discovery_metadata": {
+      "collector": "yc-company-discovery",
+      "source_url": "https://yc-oss.github.io/api/companies/all.json",
+      "source_offset": 0
+    },
+    "raw_source_payload": {}
+  }
+]
+
