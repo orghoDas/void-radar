@@ -26,6 +26,6 @@ def ingest_yc_source_record_batch(
         source=summary.source,
         received=summary.received,
         inserted=summary.inserted,
+        updated=summary.updated,
         duplicates=summary.duplicates,
     )
-

@@ -2,8 +2,15 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 
 class YCFounderRecord(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
     name: str = Field(min_length=1)
     role: str | None = None
+    profile_url: HttpUrl | None = None
+    linkedin_url: HttpUrl | None = None
+    x_url: HttpUrl | None = None
+    bio: str | None = None
+    email: str | None = None
 
 
 class YCCompanyRecord(BaseModel):
@@ -40,5 +47,5 @@ class SourceRecordIngestionResult(BaseModel):
     source: str
     received: int
     inserted: int
+    updated: int
     duplicates: int
-

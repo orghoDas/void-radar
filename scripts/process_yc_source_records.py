@@ -38,6 +38,7 @@ def main() -> int:
                 "source_identities_created": summary.source_identities_created,
                 "founders_created": summary.founders_created,
                 "founder_links_created": summary.founder_links_created,
+                "founder_profiles_created": summary.founder_profiles_created,
                 "review_items_created": summary.review_items_created,
                 "skipped_already_linked": summary.skipped_already_linked,
             },

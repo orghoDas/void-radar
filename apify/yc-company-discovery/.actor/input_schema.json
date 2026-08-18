@@ -54,6 +54,20 @@
       "description": "Keep companies with missing location data.",
       "default": false
     },
+    "includeFounderDetails": {
+      "title": "Include founder details",
+      "type": "boolean",
+      "description": "Fetch public YC company profile pages to collect founder names and public profile links.",
+      "default": true
+    },
+    "detailRequestDelayMs": {
+      "title": "Detail request delay",
+      "type": "integer",
+      "description": "Delay between public YC profile detail requests in milliseconds.",
+      "default": 300,
+      "minimum": 0,
+      "maximum": 5000
+    },
     "sourceUrl": {
       "title": "Structured source URL",
       "type": "string",

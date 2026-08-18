@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes.contacts import router as contacts_router
 from app.api.routes.health import router as health_router
 from app.api.routes.identity import router as identity_router
 from app.api.routes.ingestion import router as ingestion_router
@@ -34,6 +35,11 @@ def create_app() -> FastAPI:
         identity_router,
         prefix="/identity",
         tags=["identity"],
+    )
+    app.include_router(
+        contacts_router,
+        prefix="/contacts",
+        tags=["contacts"],
     )
 
     return app

@@ -48,6 +48,9 @@ def make_client() -> tuple[TestClient, Session]:
                     collected_at timestamp not null,
                     content_hash text,
                     created_at timestamp not null,
+                    processing_status text not null default 'pending',
+                    processed_at timestamp,
+                    processing_notes text,
                     unique (source_id, source_record_id)
                 )
                 """
@@ -77,6 +80,7 @@ def test_ingests_yc_source_records() -> None:
         "source": "y_combinator",
         "received": 1,
         "inserted": 1,
+        "updated": 0,
         "duplicates": 0,
     }
 
@@ -94,10 +98,36 @@ def test_ingestion_is_idempotent_by_source_record_id() -> None:
     assert first.status_code == 201
     assert second.status_code == 201
     assert second.json()["inserted"] == 0
+    assert second.json()["updated"] == 0
     assert second.json()["duplicates"] == 1
 
     stored_count = db.execute(text("select count(*) from source_records")).scalar_one()
     assert stored_count == 1
+
+
+def test_ingestion_updates_existing_record_when_payload_changes() -> None:
+    client, db = make_client()
+    original = yc_record()
+    updated = yc_record()
+    updated["founders"] = [{"name": "Jane Founder", "linkedin_url": "https://linkedin.com/in/jane"}]
+
+    first = client.post(
+        "/ingestion/y-combinator/source-records",
+        json={"records": [original]},
+    )
+    second = client.post(
+        "/ingestion/y-combinator/source-records",
+        json={"records": [updated]},
+    )
+
+    assert first.status_code == 201
+    assert second.status_code == 201
+    assert second.json()["inserted"] == 0
+    assert second.json()["updated"] == 1
+    assert second.json()["duplicates"] == 0
+
+    stored_payload = db.execute(text("select raw_payload from source_records")).scalar_one()
+    assert "Jane Founder" in stored_payload
 
 
 def test_rejects_unknown_source() -> None:

@@ -27,6 +27,7 @@ class IdentityResolutionSummary:
     source_identities_created: int
     founders_created: int
     founder_links_created: int
+    founder_profiles_created: int
     review_items_created: int
     skipped_already_linked: int
 
@@ -43,6 +44,7 @@ def process_yc_source_records(
     source_identities_created = 0
     founders_created = 0
     founder_links_created = 0
+    founder_profiles_created = 0
     review_items_created = 0
     skipped_already_linked = 0
 
@@ -65,6 +67,7 @@ def process_yc_source_records(
             )
             founders_created += founder_result.founders_created
             founder_links_created += founder_result.links_created
+            founder_profiles_created += founder_result.profiles_created
             mark_source_record_processed(
                 db,
                 source_record_id=source_record_id,
@@ -140,6 +143,7 @@ def process_yc_source_records(
         founder_result = ensure_founders(db, company_id=company_id, payload=payload)
         founders_created += founder_result.founders_created
         founder_links_created += founder_result.links_created
+        founder_profiles_created += founder_result.profiles_created
         link_source_record_to_company(db, source_record_id=source_record_id, company_id=company_id)
         mark_source_record_processed(
             db,
@@ -159,6 +163,7 @@ def process_yc_source_records(
         source_identities_created=source_identities_created,
         founders_created=founders_created,
         founder_links_created=founder_links_created,
+        founder_profiles_created=founder_profiles_created,
         review_items_created=review_items_created,
         skipped_already_linked=skipped_already_linked,
     )
@@ -334,6 +339,7 @@ def ensure_source_aliases(
 class FounderResult:
     founders_created: int
     links_created: int
+    profiles_created: int
 
 
 def ensure_source_identity(
@@ -427,6 +433,7 @@ def ensure_founders(
 ) -> FounderResult:
     founders_created = 0
     links_created = 0
+    profiles_created = 0
 
     for founder in payload.get("founders") or []:
         full_name = normalize_company_display_name(founder.get("name"))
@@ -444,10 +451,18 @@ def ensure_founders(
             founder_id=founder_id,
             role=founder.get("role"),
         )
+        profiles_created += ensure_founder_profile(
+            db,
+            company_id=company_id,
+            founder_id=founder_id,
+            founder=founder,
+            source_url=payload.get("source_url"),
+        )
 
     return FounderResult(
         founders_created=founders_created,
         links_created=links_created,
+        profiles_created=profiles_created,
     )
 
 
@@ -546,6 +561,105 @@ def ensure_company_founder_link(
             "role": role,
             "confidence": 0.95,
             "created_at": datetime.now(UTC),
+        },
+    )
+
+    return 1
+
+
+def ensure_founder_profile(
+    db: Session,
+    company_id: str,
+    founder_id: str,
+    founder: dict[str, Any],
+    source_url: str | None,
+) -> int:
+    profile_url = founder.get("profile_url")
+    linkedin_url = founder.get("linkedin_url")
+    x_url = founder.get("x_url")
+    email = founder.get("email")
+    bio = founder.get("bio")
+
+    if not any([profile_url, linkedin_url, x_url, email, bio]):
+        return 0
+
+    existing = db.execute(
+        text(
+            """
+            select 1
+            from founder_profiles
+            where founder_id = :founder_id
+              and source = :source
+              and coalesce(profile_url, '') = coalesce(:profile_url, '')
+              and coalesce(linkedin_url, '') = coalesce(:linkedin_url, '')
+              and coalesce(x_url, '') = coalesce(:x_url, '')
+              and coalesce(email, '') = coalesce(:email, '')
+            limit 1
+            """
+        ),
+        {
+            "founder_id": founder_id,
+            "source": YC_SOURCE_KEY,
+            "profile_url": profile_url,
+            "linkedin_url": linkedin_url,
+            "x_url": x_url,
+            "email": email,
+        },
+    ).scalar_one_or_none()
+
+    if existing:
+        return 0
+
+    now = datetime.now(UTC)
+    db.execute(
+        text(
+            """
+            insert into founder_profiles (
+                id,
+                founder_id,
+                company_id,
+                source,
+                source_url,
+                profile_url,
+                linkedin_url,
+                x_url,
+                email,
+                bio,
+                confidence,
+                created_at,
+                updated_at
+            )
+            values (
+                :id,
+                :founder_id,
+                :company_id,
+                :source,
+                :source_url,
+                :profile_url,
+                :linkedin_url,
+                :x_url,
+                :email,
+                :bio,
+                :confidence,
+                :created_at,
+                :updated_at
+            )
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "founder_id": founder_id,
+            "company_id": company_id,
+            "source": YC_SOURCE_KEY,
+            "source_url": source_url,
+            "profile_url": profile_url,
+            "linkedin_url": linkedin_url,
+            "x_url": x_url,
+            "email": email,
+            "bio": bio,
+            "confidence": 0.8,
+            "created_at": now,
+            "updated_at": now,
         },
     )
 

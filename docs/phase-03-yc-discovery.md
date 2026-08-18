@@ -152,12 +152,17 @@ The backend must be running and connected to a database with
 `database/migrations/0001_core_schema.sql` applied before using the handoff
 script.
 
-## Current Source Limitation
+## Founder Details
 
 The structured YC company feed does not currently include founder names. The
 actor outputs `founders: []` when founder data is unavailable and preserves the
-raw source payload for later review. Founder-specific collection should be added
-only if a reliable permitted source is confirmed.
+raw source payload for later review.
+
+When `includeFounderDetails` is enabled, the actor fetches each public YC
+company profile page and extracts founder names, titles, bios, and public
+profile links such as LinkedIn/X when YC exposes them. These profile links are
+discovery evidence, not verified direct-contact data. Emails should be stored
+only when obtained from a public or permitted contact source with provenance.
 
 ## Deferred to Phase 4
 

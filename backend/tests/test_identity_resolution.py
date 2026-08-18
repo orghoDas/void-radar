@@ -124,6 +124,27 @@ def make_session() -> Session:
         connection.execute(
             text(
                 """
+                create table founder_profiles (
+                    id text primary key,
+                    founder_id text not null,
+                    company_id text,
+                    source text not null,
+                    source_url text,
+                    profile_url text,
+                    linkedin_url text,
+                    x_url text,
+                    email text,
+                    bio text,
+                    confidence numeric not null default 0.95,
+                    created_at timestamp not null,
+                    updated_at timestamp not null
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
                 create table source_identities (
                     id text primary key,
                     company_id text not null,
@@ -227,7 +248,7 @@ def test_process_yc_records_creates_founders_when_present() -> None:
     insert_source(db)
     payload = yc_payload()
     payload["founders"] = [
-        {"name": "Jane Founder", "role": "CEO"},
+        {"name": "Jane Founder", "role": "CEO", "linkedin_url": "https://linkedin.com/in/jane"},
         {"name": "Sam Builder"},
     ]
     insert_source_record(db, "record-1", payload)
@@ -236,6 +257,7 @@ def test_process_yc_records_creates_founders_when_present() -> None:
 
     assert summary.founders_created == 2
     assert summary.founder_links_created == 2
+    assert summary.founder_profiles_created == 1
 
     founders = db.execute(
         text("select full_name from founders order by full_name")
@@ -244,6 +266,12 @@ def test_process_yc_records_creates_founders_when_present() -> None:
 
     link_count = db.execute(text("select count(*) from company_founders")).scalar_one()
     assert link_count == 2
+
+    profile = db.execute(
+        text("select linkedin_url, source_url from founder_profiles")
+    ).one()
+    assert profile.linkedin_url == "https://linkedin.com/in/jane"
+    assert profile.source_url == payload["source_url"]
 
 
 def test_process_yc_records_backfills_source_identity_for_already_linked_record() -> None:

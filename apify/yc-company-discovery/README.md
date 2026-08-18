@@ -36,6 +36,8 @@ Expected output shape:
 {
   "maxItems": 50,
   "minEmployees": 50,
+  "includeFounderDetails": true,
+  "detailRequestDelayMs": 300,
   "regions": ["United States", "USA", "United Kingdom", "UK", "Europe"],
   "includeUnknownLocation": false,
   "sourceUrl": "https://yc-oss.github.io/api/companies/all.json",
@@ -66,9 +68,12 @@ POST /ingestion/y-combinator/source-records
 Phase 3 intentionally stores source records only. Normalization, canonical
 company creation, domain resolution, and merge decisions are Phase 4 work.
 
-## Current Source Limitation
+## Founder Details
 
-The structured public feed used by this actor does not currently include founder
-names. The actor preserves an empty `founders` array when founder data is not
-available. Founder enrichment should be handled by a later source-specific
-detail parser or enrichment step.
+The structured public feed used by this actor does not include founder names by
+itself. When `includeFounderDetails` is enabled, the actor fetches each public
+YC company profile page and extracts founder names, roles, bios, and public
+profile links when present.
+
+Direct emails are not inferred. The actor only preserves emails if they are
+explicitly present in the public source payload.

@@ -39,7 +39,7 @@ def main() -> int:
         print("No records found.", file=sys.stderr)
         return 1
 
-    totals = {"received": 0, "inserted": 0, "duplicates": 0}
+    totals = {"received": 0, "inserted": 0, "updated": 0, "duplicates": 0}
     for batch in chunked(records, args.batch_size):
         result = post_batch(args.endpoint, batch)
         for key in totals:

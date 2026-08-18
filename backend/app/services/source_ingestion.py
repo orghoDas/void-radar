@@ -17,6 +17,7 @@ class IngestionSummary:
     source: str
     received: int
     inserted: int
+    updated: int
     duplicates: int
 
 
@@ -26,14 +27,28 @@ def ingest_yc_source_records(
 ) -> IngestionSummary:
     source_id = ensure_yc_source(db)
     inserted = 0
+    updated = 0
     duplicates = 0
 
     for record in records:
-        if source_record_exists(db, source_id, record.source_company_id):
-            duplicates += 1
+        payload = record.model_dump(mode="json")
+        payload_hash = content_hash(payload)
+        existing_hash = find_source_record_hash(db, source_id, record.source_company_id)
+        if existing_hash is not None:
+            if existing_hash != payload_hash:
+                update_source_record(
+                    db,
+                    source_id=source_id,
+                    source_record_id=record.source_company_id,
+                    raw_payload=json.dumps(payload, sort_keys=True),
+                    source_url=str(record.source_url),
+                    content_hash=payload_hash,
+                )
+                updated += 1
+            else:
+                duplicates += 1
             continue
 
-        payload = record.model_dump(mode="json")
         db.execute(
             text(source_record_insert_sql(db)),
             {
@@ -43,7 +58,7 @@ def ingest_yc_source_records(
                 "raw_payload": json.dumps(payload, sort_keys=True),
                 "source_url": str(record.source_url),
                 "collected_at": datetime.now(UTC),
-                "content_hash": content_hash(payload),
+                "content_hash": payload_hash,
                 "created_at": datetime.now(UTC),
             },
         )
@@ -55,6 +70,7 @@ def ingest_yc_source_records(
         source=YC_SOURCE_KEY,
         received=len(records),
         inserted=inserted,
+        updated=updated,
         duplicates=duplicates,
     )
 
@@ -113,15 +129,15 @@ def ensure_yc_source(db: Session) -> str:
     return source_id
 
 
-def source_record_exists(
+def find_source_record_hash(
     db: Session,
     source_id: str,
     source_record_id: str,
-) -> bool:
-    existing = db.execute(
+) -> str | None:
+    existing_hash = db.execute(
         text(
             """
-            select 1
+            select content_hash
             from source_records
             where source_id = :source_id
               and source_record_id = :source_record_id
@@ -134,7 +150,28 @@ def source_record_exists(
         },
     ).scalar_one_or_none()
 
-    return existing is not None
+    return str(existing_hash) if existing_hash else None
+
+
+def update_source_record(
+    db: Session,
+    source_id: str,
+    source_record_id: str,
+    raw_payload: str,
+    source_url: str,
+    content_hash: str,
+) -> None:
+    db.execute(
+        text(source_record_update_sql(db)),
+        {
+            "source_id": source_id,
+            "source_record_id": source_record_id,
+            "raw_payload": raw_payload,
+            "source_url": source_url,
+            "collected_at": datetime.now(UTC),
+            "content_hash": content_hash,
+        },
+    )
 
 
 def content_hash(payload: dict) -> str:
@@ -170,3 +207,22 @@ def source_record_insert_sql(db: Session) -> str:
         )
     """
 
+
+def source_record_update_sql(db: Session) -> str:
+    raw_payload_value = ":raw_payload"
+    if db.bind is not None and db.bind.dialect.name == "postgresql":
+        raw_payload_value = "cast(:raw_payload as jsonb)"
+
+    return f"""
+        update source_records
+        set
+            raw_payload = {raw_payload_value},
+            source_url = :source_url,
+            collected_at = :collected_at,
+            content_hash = :content_hash,
+            processing_status = 'pending',
+            processed_at = null,
+            processing_notes = 'Source payload updated during ingestion.'
+        where source_id = :source_id
+          and source_record_id = :source_record_id
+    """

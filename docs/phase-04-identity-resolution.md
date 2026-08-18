@@ -10,6 +10,7 @@ source_records
   -> company_aliases
   -> source_identities
   -> founders + company_founders when available
+  -> founder_profiles when public profile links are available
   -> source_records.company_id
 ```
 
@@ -27,6 +28,8 @@ signals, score prospects, or enrich contacts.
 - External source identity preservation.
 - Founder and company-founder link creation when source payloads include founder
   names.
+- Founder profile/contact-link preservation when source payloads include public
+  profile links.
 - Review state for records that cannot be safely linked.
 
 ## Database Changes
@@ -64,6 +67,18 @@ source_identities
 founder name/location uniqueness index
 ```
 
+Founder profile/contact-link migration:
+
+```text
+database/migrations/0004_founder_profiles.sql
+```
+
+Adds:
+
+```text
+founder_profiles
+```
+
 ## Resolution Policy
 
 Domain is the strongest identifier in this phase.
@@ -75,11 +90,17 @@ normalized website domain exists?
       -> not found: create candidate company and link source record
       -> store source external ID in source_identities
       -> create founders if payload includes founder names
+      -> store public founder profile links if source provides them
   -> no: create identity review item
 ```
 
 The current implementation intentionally avoids fuzzy name merging. Fuzzy
 matching can be added later once we have review UI and evidence display.
+
+Founder emails are not inferred. Store direct founder emails only when a public
+or permitted enrichment source provides them with source URL and confidence.
+YC profile links are useful outreach leads, but should be verified before
+contacting.
 
 ## Run Locally
 
@@ -101,6 +122,15 @@ Apply migrations:
   -d void_radar \
   -v ON_ERROR_STOP=1 \
   -f database/migrations/0003_source_identities_and_founders.sql
+```
+
+```bash
+/opt/homebrew/opt/postgresql@16/bin/psql \
+  -h /tmp \
+  -p 5432 \
+  -d void_radar \
+  -v ON_ERROR_STOP=1 \
+  -f database/migrations/0004_founder_profiles.sql
 ```
 
 Process YC source records:
@@ -132,5 +162,6 @@ Phase 4 is complete when:
 - Company aliases are preserved.
 - Source identities are preserved.
 - Founder records are created only when source payloads include founders.
+- Public founder profile links are preserved when present.
 - Missing-domain records go to review state.
 - Running the resolver twice does not create duplicate companies.

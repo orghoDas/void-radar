@@ -1,4 +1,5 @@
 import { Actor, log } from 'apify';
+import * as cheerio from 'cheerio';
 
 const YC_SOURCE = 'y_combinator';
 const DEFAULT_SOURCE_URL = 'https://yc-oss.github.io/api/companies/all.json';
@@ -35,6 +36,8 @@ await Actor.main(async () => {
   const sourceUrl = input.sourceUrl ?? DEFAULT_SOURCE_URL;
   const startOffset = Number(input.startOffset ?? 0);
   const includeUnknownLocation = Boolean(input.includeUnknownLocation ?? false);
+  const includeFounderDetails = input.includeFounderDetails !== false;
+  const detailRequestDelayMs = Number(input.detailRequestDelayMs ?? 300);
   const regions = Array.isArray(input.regions) ? input.regions : DEFAULT_REGIONS;
 
   log.info('Starting YC company discovery', {
@@ -43,6 +46,8 @@ await Actor.main(async () => {
     sourceUrl,
     startOffset,
     includeUnknownLocation,
+    includeFounderDetails,
+    detailRequestDelayMs,
     regions,
   });
 
@@ -63,6 +68,11 @@ await Actor.main(async () => {
 
     if (!passesRegionFilter(record, regions, includeUnknownLocation)) {
       continue;
+    }
+
+    if (includeFounderDetails) {
+      record.founders = await fetchFounderDetails(record.source_url);
+      await sleep(detailRequestDelayMs);
     }
 
     records.push({
@@ -121,6 +131,234 @@ async function fetchCompanies(sourceUrl) {
   }
 
   throw new Error('YC company feed did not contain a company array.');
+}
+
+async function fetchFounderDetails(sourceUrl) {
+  if (!sourceUrl) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(sourceUrl, {
+      headers: {
+        accept: 'text/html,application/xhtml+xml',
+        'user-agent': 'VoidRadarYCDiscovery/0.1',
+      },
+    });
+
+    if (!response.ok) {
+      log.warning('Failed to fetch YC company profile for founder details', {
+        sourceUrl,
+        status: response.status,
+      });
+      return [];
+    }
+
+    const html = await response.text();
+    return extractFoundersFromHtml(html, sourceUrl);
+  } catch (error) {
+    log.warning('Founder detail fetch failed', {
+      sourceUrl,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+function extractFoundersFromHtml(html, sourceUrl) {
+  const $ = cheerio.load(html);
+  const fromInertia = extractFoundersFromInertiaPage($, sourceUrl);
+  if (fromInertia.length) {
+    return dedupeFounders(fromInertia);
+  }
+
+  return dedupeFounders(extractFoundersFromFounderLinks($, sourceUrl));
+}
+
+function extractFoundersFromInertiaPage($, sourceUrl) {
+  const rawPage = $('[data-page]').attr('data-page');
+  if (!rawPage) {
+    return [];
+  }
+
+  try {
+    const page = JSON.parse(rawPage);
+    return findFounderArrays(page).flatMap((founders) =>
+      founders.map((founder) => normalizeFounderObject(founder, sourceUrl)).filter(Boolean)
+    );
+  } catch (error) {
+    log.debug('Unable to parse YC Inertia page payload for founders', {
+      sourceUrl,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return [];
+  }
+}
+
+function findFounderArrays(value, path = []) {
+  if (!value || typeof value !== 'object') {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    const keyPath = path.join('.').toLowerCase();
+    if (keyPath.includes('founder')) {
+      return [value];
+    }
+
+    return value.flatMap((item, index) => findFounderArrays(item, [...path, String(index)]));
+  }
+
+  return Object.entries(value).flatMap(([key, child]) =>
+    findFounderArrays(child, [...path, key])
+  );
+}
+
+function normalizeFounderObject(founder, sourceUrl) {
+  if (!founder || typeof founder !== 'object') {
+    return null;
+  }
+
+  const name = firstPresent(
+    founder.name,
+    founder.full_name,
+    founder.fullName,
+    founder.title,
+    founder.username
+  );
+
+  if (!name) {
+    return null;
+  }
+
+  const profileUrl = normalizeProfileUrl(
+    firstPresent(founder.url, founder.profile_url, founder.profileUrl, founder.path),
+    sourceUrl
+  );
+  const linkedinUrl = firstPresent(
+    founder.linkedin_url,
+    founder.linkedinUrl,
+    founder.linkedin,
+    founder.linkedin_link
+  );
+  const xUrl = firstPresent(founder.twitter_url, founder.twitterUrl, founder.twitter, founder.x_url);
+
+  return {
+    name: String(name),
+    role: firstPresent(founder.role, founder.title, founder.title_text, founder.position),
+    profile_url: profileUrl,
+    linkedin_url: normalizeAbsoluteUrl(linkedinUrl, sourceUrl),
+    x_url: normalizeAbsoluteUrl(
+      firstPresent(xUrl, founder.twitter_url, founder.twitterUrl),
+      sourceUrl
+    ),
+    bio: firstPresent(founder.bio, founder.founder_bio, founder.description, founder.about),
+    email: extractFirstEmail(JSON.stringify(founder)),
+  };
+}
+
+function extractFoundersFromFounderLinks($, sourceUrl) {
+  const founders = [];
+
+  $('a[href*="/people/"], a[href*="linkedin.com/in/"]').each((_index, element) => {
+    const link = $(element);
+    const href = link.attr('href');
+    const card = link.closest('div, li, article, section');
+    const cardText = card.text().replace(/\s+/g, ' ').trim();
+    const linkText = link.text().replace(/\s+/g, ' ').trim();
+    const imgAlt = link.find('img[alt]').attr('alt');
+    const name = firstPresent(linkText, imgAlt, inferNameFromCardText(cardText));
+
+    if (!name) {
+      return;
+    }
+
+    founders.push({
+      name,
+      role: inferRole(cardText),
+      profile_url: href && href.includes('/people/') ? normalizeAbsoluteUrl(href, sourceUrl) : null,
+      linkedin_url: href && href.includes('linkedin.com') ? normalizeAbsoluteUrl(href, sourceUrl) : null,
+      x_url: extractSocialUrl($, card, sourceUrl, ['twitter.com', 'x.com']),
+      bio: cardText || null,
+      email: extractFirstEmail(cardText),
+    });
+  });
+
+  return founders;
+}
+
+function normalizeProfileUrl(value, sourceUrl) {
+  return normalizeAbsoluteUrl(value, sourceUrl);
+}
+
+function normalizeAbsoluteUrl(value, sourceUrl) {
+  if (!value || typeof value !== 'string') {
+    return null;
+  }
+
+  try {
+    return new URL(value, sourceUrl).toString();
+  } catch {
+    return null;
+  }
+}
+
+function inferNameFromCardText(value) {
+  if (!value) {
+    return null;
+  }
+
+  const candidate = value.split(/Founder|CEO|CTO|COO|Chief|LinkedIn|Twitter|X/i)[0]?.trim();
+  return candidate && candidate.length <= 80 ? candidate : null;
+}
+
+function inferRole(value) {
+  if (!value) {
+    return null;
+  }
+
+  const match = value.match(
+    /\b(Co-Founder|Cofounder|Founder\/CEO|Founder|CEO|CTO|COO|Chief [A-Za-z ]+ Officer)\b/i
+  );
+
+  return match ? match[0] : null;
+}
+
+function extractSocialUrl($, card, sourceUrl, domains) {
+  const link = card
+    .find('a[href]')
+    .toArray()
+    .map((element) => $(element).attr('href'))
+    .find((href) => domains.some((domain) => href?.includes(domain)));
+
+  return normalizeAbsoluteUrl(link, sourceUrl);
+}
+
+function extractFirstEmail(value) {
+  if (!value) {
+    return null;
+  }
+
+  const match = String(value).match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return match ? match[0] : null;
+}
+
+function dedupeFounders(founders) {
+  const seen = new Set();
+  const deduped = [];
+
+  for (const founder of founders) {
+    const key = String(firstPresent(founder.name, founder.linkedin_url, founder.profile_url))
+      .toLowerCase()
+      .trim();
+    if (!key || seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    deduped.push(founder);
+  }
+
+  return deduped;
 }
 
 function standardizeCompany(raw) {
@@ -271,4 +509,12 @@ function passesRegionFilter(record, regions, includeUnknownLocation) {
 
 function firstPresent(...values) {
   return values.find((value) => value !== null && value !== undefined && value !== '');
+}
+
+function sleep(ms) {
+  if (!ms || ms <= 0) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
