@@ -58,6 +58,7 @@
       "title": "Structured source URL",
       "type": "string",
       "description": "Public structured YC company feed used by the actor.",
+      "editor": "textfield",
       "default": "https://yc-oss.github.io/api/companies/all.json"
     },
     "startOffset": {

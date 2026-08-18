@@ -95,6 +95,52 @@ def make_session() -> Session:
         connection.execute(
             text(
                 """
+                create table founders (
+                    id text primary key,
+                    full_name text not null,
+                    location text,
+                    bio text,
+                    created_at timestamp not null,
+                    updated_at timestamp not null
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+                create table company_founders (
+                    company_id text not null,
+                    founder_id text not null,
+                    role text,
+                    source_id text,
+                    confidence numeric not null default 0,
+                    created_at timestamp not null,
+                    primary key (company_id, founder_id)
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
+                create table source_identities (
+                    id text primary key,
+                    company_id text not null,
+                    source_id text not null,
+                    external_id text not null,
+                    source_url text,
+                    confidence numeric not null default 1,
+                    first_seen_at timestamp not null,
+                    last_seen_at timestamp not null,
+                    unique (source_id, external_id)
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
                 create table identity_resolution_reviews (
                     id text primary key,
                     source_record_id text not null,
@@ -126,6 +172,7 @@ def test_process_yc_records_creates_companies_and_aliases() -> None:
     assert summary.scanned == 1
     assert summary.companies_created == 1
     assert summary.aliases_created == 1
+    assert summary.source_identities_created == 1
     assert summary.review_items_created == 0
 
     company = db.execute(
@@ -146,6 +193,12 @@ def test_process_yc_records_creates_companies_and_aliases() -> None:
     ).scalar_one()
     assert linked_count == 1
 
+    source_identity = db.execute(
+        text("select external_id, source_url from source_identities")
+    ).one()
+    assert source_identity.external_id == "record-1"
+    assert source_identity.source_url == yc_payload()["source_url"]
+
 
 def test_process_yc_records_is_idempotent_for_linked_records() -> None:
     db = make_session()
@@ -158,9 +211,61 @@ def test_process_yc_records_is_idempotent_for_linked_records() -> None:
     assert first.companies_created == 1
     assert second.companies_created == 0
     assert second.skipped_already_linked == 1
+    assert second.source_identities_created == 0
 
     company_count = db.execute(text("select count(*) from companies")).scalar_one()
     assert company_count == 1
+
+    source_identity_count = db.execute(
+        text("select count(*) from source_identities")
+    ).scalar_one()
+    assert source_identity_count == 1
+
+
+def test_process_yc_records_creates_founders_when_present() -> None:
+    db = make_session()
+    insert_source(db)
+    payload = yc_payload()
+    payload["founders"] = [
+        {"name": "Jane Founder", "role": "CEO"},
+        {"name": "Sam Builder"},
+    ]
+    insert_source_record(db, "record-1", payload)
+
+    summary = process_yc_source_records(db)
+
+    assert summary.founders_created == 2
+    assert summary.founder_links_created == 2
+
+    founders = db.execute(
+        text("select full_name from founders order by full_name")
+    ).all()
+    assert [row.full_name for row in founders] == ["Jane Founder", "Sam Builder"]
+
+    link_count = db.execute(text("select count(*) from company_founders")).scalar_one()
+    assert link_count == 2
+
+
+def test_process_yc_records_backfills_source_identity_for_already_linked_record() -> None:
+    db = make_session()
+    insert_source(db)
+    insert_source_record(db, "record-1", yc_payload())
+
+    first = process_yc_source_records(db)
+    assert first.source_identities_created == 1
+
+    db.execute(text("delete from source_identities"))
+    db.commit()
+
+    second = process_yc_source_records(db)
+
+    assert second.skipped_already_linked == 1
+    assert second.source_identities_created == 1
+
+    source_identity_count = db.execute(
+        text("select count(*) from source_identities")
+    ).scalar_one()
+    assert source_identity_count == 1
 
 
 def test_process_yc_records_creates_review_item_for_missing_domain() -> None:
@@ -260,4 +365,3 @@ def yc_payload() -> dict:
         "description": "AI workflow platform for operations teams.",
         "founders": [],
     }
-

@@ -135,6 +135,19 @@ python3 scripts/ingest_yc_dataset.py \
   /private/tmp/void-radar-yc-test/datasets/default
 ```
 
+Apify Console JSON export handoff:
+
+```bash
+python3 scripts/ingest_yc_dataset.py \
+  /Users/orghodas/Downloads/yc-cloud-export.json
+```
+
+The script accepts either:
+
+- a local Apify dataset directory containing one `.json` file per record
+- a single Apify JSON export file containing an array of records
+- a wrapped export shaped like `{"items": [...]}`
+
 The backend must be running and connected to a database with
 `database/migrations/0001_core_schema.sql` applied before using the handoff
 script.

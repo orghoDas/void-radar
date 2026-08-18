@@ -24,6 +24,9 @@ class IdentityResolutionSummary:
     companies_created: int
     companies_matched: int
     aliases_created: int
+    source_identities_created: int
+    founders_created: int
+    founder_links_created: int
     review_items_created: int
     skipped_already_linked: int
 
@@ -37,22 +40,39 @@ def process_yc_source_records(
     companies_created = 0
     companies_matched = 0
     aliases_created = 0
+    source_identities_created = 0
+    founders_created = 0
+    founder_links_created = 0
     review_items_created = 0
     skipped_already_linked = 0
 
     for row in rows:
         source_record_id = str(row.id)
+        payload = parse_payload(row.raw_payload)
         if row.company_id:
             skipped_already_linked += 1
+            source_identities_created += ensure_source_identity(
+                db,
+                company_id=str(row.company_id),
+                source_id=str(row.source_id),
+                external_id=str(row.source_record_id),
+                source_url=str(row.source_url) if row.source_url else None,
+            )
+            founder_result = ensure_founders(
+                db,
+                company_id=str(row.company_id),
+                payload=payload,
+            )
+            founders_created += founder_result.founders_created
+            founder_links_created += founder_result.links_created
             mark_source_record_processed(
                 db,
                 source_record_id=source_record_id,
                 status="linked",
-                notes="Source record was already linked to a company.",
+                notes="Source record was already linked to a company; source identity backfilled.",
             )
             continue
 
-        payload = parse_payload(row.raw_payload)
         company_name = normalize_company_display_name(payload.get("company_name"))
         domain = normalize_domain(payload.get("website"))
 
@@ -110,6 +130,16 @@ def process_yc_source_records(
         )
 
         aliases_created += ensure_source_aliases(db, company_id=company_id, payload=payload)
+        source_identities_created += ensure_source_identity(
+            db,
+            company_id=company_id,
+            source_id=str(row.source_id),
+            external_id=str(row.source_record_id),
+            source_url=str(row.source_url) if row.source_url else None,
+        )
+        founder_result = ensure_founders(db, company_id=company_id, payload=payload)
+        founders_created += founder_result.founders_created
+        founder_links_created += founder_result.links_created
         link_source_record_to_company(db, source_record_id=source_record_id, company_id=company_id)
         mark_source_record_processed(
             db,
@@ -126,6 +156,9 @@ def process_yc_source_records(
         companies_created=companies_created,
         companies_matched=companies_matched,
         aliases_created=aliases_created,
+        source_identities_created=source_identities_created,
+        founders_created=founders_created,
+        founder_links_created=founder_links_created,
         review_items_created=review_items_created,
         skipped_already_linked=skipped_already_linked,
     )
@@ -141,7 +174,13 @@ def load_yc_source_records(db: Session, limit: int | None) -> list[Any]:
         db.execute(
             text(
                 f"""
-                select sr.id, sr.company_id, sr.raw_payload
+                select
+                    sr.id,
+                    sr.source_id,
+                    sr.source_record_id,
+                    sr.company_id,
+                    sr.raw_payload,
+                    sr.source_url
                 from source_records sr
                 join sources s on s.id = sr.source_id
                 where s.source_key = :source_key
@@ -289,6 +328,228 @@ def ensure_source_aliases(
         )
 
     return aliases_created
+
+
+@dataclass(frozen=True)
+class FounderResult:
+    founders_created: int
+    links_created: int
+
+
+def ensure_source_identity(
+    db: Session,
+    company_id: str,
+    source_id: str,
+    external_id: str,
+    source_url: str | None,
+) -> int:
+    existing = db.execute(
+        text(
+            """
+            select 1
+            from source_identities
+            where source_id = :source_id
+              and external_id = :external_id
+            limit 1
+            """
+        ),
+        {"source_id": source_id, "external_id": external_id},
+    ).scalar_one_or_none()
+
+    if existing:
+        db.execute(
+            text(
+                """
+                update source_identities
+                set
+                    company_id = :company_id,
+                    source_url = coalesce(:source_url, source_url),
+                    last_seen_at = :last_seen_at
+                where source_id = :source_id
+                  and external_id = :external_id
+                """
+            ),
+            {
+                "company_id": company_id,
+                "source_id": source_id,
+                "external_id": external_id,
+                "source_url": source_url,
+                "last_seen_at": datetime.now(UTC),
+            },
+        )
+        return 0
+
+    now = datetime.now(UTC)
+    db.execute(
+        text(
+            """
+            insert into source_identities (
+                id,
+                company_id,
+                source_id,
+                external_id,
+                source_url,
+                confidence,
+                first_seen_at,
+                last_seen_at
+            )
+            values (
+                :id,
+                :company_id,
+                :source_id,
+                :external_id,
+                :source_url,
+                :confidence,
+                :first_seen_at,
+                :last_seen_at
+            )
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "company_id": company_id,
+            "source_id": source_id,
+            "external_id": external_id,
+            "source_url": source_url,
+            "confidence": 1,
+            "first_seen_at": now,
+            "last_seen_at": now,
+        },
+    )
+
+    return 1
+
+
+def ensure_founders(
+    db: Session,
+    company_id: str,
+    payload: dict[str, Any],
+) -> FounderResult:
+    founders_created = 0
+    links_created = 0
+
+    for founder in payload.get("founders") or []:
+        full_name = normalize_company_display_name(founder.get("name"))
+        if not full_name:
+            continue
+
+        founder_id = find_founder(db, full_name=full_name)
+        if not founder_id:
+            founder_id = create_founder(db, full_name=full_name)
+            founders_created += 1
+
+        links_created += ensure_company_founder_link(
+            db,
+            company_id=company_id,
+            founder_id=founder_id,
+            role=founder.get("role"),
+        )
+
+    return FounderResult(
+        founders_created=founders_created,
+        links_created=links_created,
+    )
+
+
+def find_founder(db: Session, full_name: str) -> str | None:
+    founder_id = db.execute(
+        text(
+            """
+            select id
+            from founders
+            where lower(full_name) = lower(:full_name)
+            limit 1
+            """
+        ),
+        {"full_name": full_name},
+    ).scalar_one_or_none()
+
+    return str(founder_id) if founder_id else None
+
+
+def create_founder(db: Session, full_name: str) -> str:
+    founder_id = str(uuid4())
+    now = datetime.now(UTC)
+
+    db.execute(
+        text(
+            """
+            insert into founders (
+                id,
+                full_name,
+                created_at,
+                updated_at
+            )
+            values (
+                :id,
+                :full_name,
+                :created_at,
+                :updated_at
+            )
+            """
+        ),
+        {
+            "id": founder_id,
+            "full_name": full_name,
+            "created_at": now,
+            "updated_at": now,
+        },
+    )
+
+    return founder_id
+
+
+def ensure_company_founder_link(
+    db: Session,
+    company_id: str,
+    founder_id: str,
+    role: str | None,
+) -> int:
+    existing = db.execute(
+        text(
+            """
+            select 1
+            from company_founders
+            where company_id = :company_id
+              and founder_id = :founder_id
+            limit 1
+            """
+        ),
+        {"company_id": company_id, "founder_id": founder_id},
+    ).scalar_one_or_none()
+
+    if existing:
+        return 0
+
+    db.execute(
+        text(
+            """
+            insert into company_founders (
+                company_id,
+                founder_id,
+                role,
+                confidence,
+                created_at
+            )
+            values (
+                :company_id,
+                :founder_id,
+                :role,
+                :confidence,
+                :created_at
+            )
+            """
+        ),
+        {
+            "company_id": company_id,
+            "founder_id": founder_id,
+            "role": role,
+            "confidence": 0.95,
+            "created_at": datetime.now(UTC),
+        },
+    )
+
+    return 1
 
 
 def ensure_company_alias(
@@ -482,4 +743,3 @@ def review_insert_sql(db: Session) -> str:
             :updated_at
         )
     """
-

@@ -7,6 +7,8 @@ class IdentityResolutionResult(BaseModel):
     companies_created: int
     companies_matched: int
     aliases_created: int
+    source_identities_created: int
+    founders_created: int
+    founder_links_created: int
     review_items_created: int
     skipped_already_linked: int
-

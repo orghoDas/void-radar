@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Post local Apify YC dataset records to the Void Radar backend."""
+"""Post Apify YC dataset records to the Void Radar backend."""
 
 from __future__ import annotations
 
@@ -17,9 +17,9 @@ DEFAULT_ENDPOINT = "http://localhost:8000/ingestion/y-combinator/source-records"
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "dataset_dir",
+        "dataset_path",
         type=Path,
-        help="Directory containing Apify dataset JSON files.",
+        help="Apify dataset directory or a single exported JSON file.",
     )
     parser.add_argument(
         "--endpoint",
@@ -34,7 +34,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    records = read_dataset(args.dataset_dir)
+    records = read_dataset(args.dataset_path)
     if not records:
         print("No records found.", file=sys.stderr)
         return 1
@@ -49,11 +49,50 @@ def main() -> int:
     return 0
 
 
-def read_dataset(dataset_dir: Path) -> list[dict]:
+def read_dataset(dataset_path: Path) -> list[dict]:
+    if dataset_path.is_dir():
+        return read_dataset_dir(dataset_path)
+
+    if dataset_path.is_file():
+        return read_dataset_file(dataset_path)
+
+    raise FileNotFoundError(f"Dataset path not found: {dataset_path}")
+
+
+def read_dataset_dir(dataset_dir: Path) -> list[dict]:
     records: list[dict] = []
     for path in sorted(dataset_dir.glob("*.json")):
         with path.open("r", encoding="utf-8") as file:
-            records.append(json.load(file))
+            payload = json.load(file)
+        records.extend(normalize_export_payload(payload, source_path=path))
+    return records
+
+
+def read_dataset_file(dataset_file: Path) -> list[dict]:
+    with dataset_file.open("r", encoding="utf-8") as file:
+        payload = json.load(file)
+    return normalize_export_payload(payload, source_path=dataset_file)
+
+
+def normalize_export_payload(payload: object, source_path: Path) -> list[dict]:
+    if isinstance(payload, list):
+        records = payload
+    elif isinstance(payload, dict) and isinstance(payload.get("items"), list):
+        records = payload["items"]
+    elif isinstance(payload, dict):
+        records = [payload]
+    else:
+        raise ValueError(f"Unsupported dataset payload in {source_path}")
+
+    invalid_items = [
+        index for index, record in enumerate(records) if not isinstance(record, dict)
+    ]
+    if invalid_items:
+        raise ValueError(
+            f"Dataset payload in {source_path} contains non-object records "
+            f"at indexes {invalid_items[:5]}"
+        )
+
     return records
 
 
@@ -80,4 +119,3 @@ def chunked(records: list[dict], size: int) -> list[list[dict]]:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

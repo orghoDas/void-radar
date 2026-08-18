@@ -8,6 +8,8 @@ source_records
   -> domain-first identity resolution
   -> companies
   -> company_aliases
+  -> source_identities
+  -> founders + company_founders when available
   -> source_records.company_id
 ```
 
@@ -22,6 +24,9 @@ signals, score prospects, or enrich contacts.
 - Domain-first canonical company creation.
 - Source-record-to-company linking.
 - Company alias preservation.
+- External source identity preservation.
+- Founder and company-founder link creation when source payloads include founder
+  names.
 - Review state for records that cannot be safely linked.
 
 ## Database Changes
@@ -46,6 +51,19 @@ Adds review table:
 identity_resolution_reviews
 ```
 
+Additional hardening migration:
+
+```text
+database/migrations/0003_source_identities_and_founders.sql
+```
+
+Adds:
+
+```text
+source_identities
+founder name/location uniqueness index
+```
+
 ## Resolution Policy
 
 Domain is the strongest identifier in this phase.
@@ -55,6 +73,8 @@ normalized website domain exists?
   -> yes: find existing company by canonical_domain
       -> found: link source record
       -> not found: create candidate company and link source record
+      -> store source external ID in source_identities
+      -> create founders if payload includes founder names
   -> no: create identity review item
 ```
 
@@ -72,6 +92,15 @@ Apply migrations:
   -d void_radar \
   -v ON_ERROR_STOP=1 \
   -f database/migrations/0002_identity_resolution.sql
+```
+
+```bash
+/opt/homebrew/opt/postgresql@16/bin/psql \
+  -h /tmp \
+  -p 5432 \
+  -d void_radar \
+  -v ON_ERROR_STOP=1 \
+  -f database/migrations/0003_source_identities_and_founders.sql
 ```
 
 Process YC source records:
@@ -101,6 +130,7 @@ Phase 4 is complete when:
 - YC source records can create canonical companies.
 - Source records are linked to company IDs.
 - Company aliases are preserved.
+- Source identities are preserved.
+- Founder records are created only when source payloads include founders.
 - Missing-domain records go to review state.
 - Running the resolver twice does not create duplicate companies.
-
