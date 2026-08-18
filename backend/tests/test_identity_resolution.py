@@ -4,8 +4,11 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.services.identity_resolution import process_yc_source_records
-from app.services.source_ingestion import YC_SOURCE_KEY
+from app.services.identity_resolution import (
+    process_entrepreneur_first_source_records,
+    process_yc_source_records,
+)
+from app.services.source_ingestion import ENTREPRENEUR_FIRST_SOURCE_KEY, YC_SOURCE_KEY
 
 
 def make_session() -> Session:
@@ -315,7 +318,51 @@ def test_process_yc_records_creates_review_item_for_missing_domain() -> None:
     assert review.normalized_name == "Example AI"
 
 
-def insert_source(db: Session) -> None:
+def test_process_entrepreneur_first_records_allows_name_only_founder_linking() -> None:
+    db = make_session()
+    insert_source(
+        db,
+        source_id="ef-source",
+        source_key=ENTREPRENEUR_FIRST_SOURCE_KEY,
+        source_name="Entrepreneurs First",
+    )
+    payload = entrepreneur_first_payload()
+    insert_source_record(db, "tractable", payload, source_id="ef-source")
+
+    summary = process_entrepreneur_first_source_records(db)
+
+    assert summary.source == ENTREPRENEUR_FIRST_SOURCE_KEY
+    assert summary.scanned == 1
+    assert summary.companies_created == 1
+    assert summary.review_items_created == 0
+    assert summary.founders_created == 2
+    assert summary.founder_links_created == 2
+    assert summary.founder_profiles_created == 2
+
+    company = db.execute(
+        text("select canonical_name, canonical_domain, city from companies")
+    ).one()
+    assert company.canonical_name == "Tractable"
+    assert company.canonical_domain is None
+    assert company.city == "London"
+
+    profile_sources = db.execute(
+        text("select source, linkedin_url from founder_profiles order by linkedin_url")
+    ).all()
+    assert [row.source for row in profile_sources] == [
+        ENTREPRENEUR_FIRST_SOURCE_KEY,
+        ENTREPRENEUR_FIRST_SOURCE_KEY,
+    ]
+    assert profile_sources[0].linkedin_url == "https://www.linkedin.com/in/adalyac/"
+
+
+def insert_source(
+    db: Session,
+    *,
+    source_id: str = "source-1",
+    source_key: str = YC_SOURCE_KEY,
+    source_name: str = "Y Combinator",
+) -> None:
     db.execute(
         text(
             """
@@ -329,9 +376,9 @@ def insert_source(db: Session) -> None:
                 updated_at
             )
             values (
-                'source-1',
+                :source_id,
                 :source_key,
-                'Y Combinator',
+                :source_name,
                 'trusted_company_source',
                 true,
                 current_timestamp,
@@ -339,12 +386,22 @@ def insert_source(db: Session) -> None:
             )
             """
         ),
-        {"source_key": YC_SOURCE_KEY},
+        {
+            "source_id": source_id,
+            "source_key": source_key,
+            "source_name": source_name,
+        },
     )
     db.commit()
 
 
-def insert_source_record(db: Session, source_record_id: str, payload: dict) -> None:
+def insert_source_record(
+    db: Session,
+    source_record_id: str,
+    payload: dict,
+    *,
+    source_id: str = "source-1",
+) -> None:
     db.execute(
         text(
             """
@@ -359,7 +416,7 @@ def insert_source_record(db: Session, source_record_id: str, payload: dict) -> N
             )
             values (
                 :id,
-                'source-1',
+                :source_id,
                 :source_record_id,
                 :raw_payload,
                 :source_url,
@@ -370,6 +427,7 @@ def insert_source_record(db: Session, source_record_id: str, payload: dict) -> N
         ),
         {
             "id": source_record_id,
+            "source_id": source_id,
             "source_record_id": source_record_id,
             "raw_payload": json.dumps(payload),
             "source_url": payload["source_url"],
@@ -392,4 +450,30 @@ def yc_payload() -> dict:
         "employee_count": 75,
         "description": "AI workflow platform for operations teams.",
         "founders": [],
+    }
+
+
+def entrepreneur_first_payload() -> dict:
+    return {
+        "source": "entrepreneur_first",
+        "source_url": "https://www.joinef.com/portfolio/#tractable",
+        "source_company_id": "tractable",
+        "company_name": "Tractable",
+        "website": None,
+        "location": "London",
+        "industry": "Automotive & Mobility, Insurance",
+        "description": "AI for accident and disaster recovery.",
+        "founded_year": "2014",
+        "founders": [
+            {
+                "name": "Alex Dalyac",
+                "role": "Founding CEO",
+                "linkedin_url": "https://www.linkedin.com/in/adalyac/",
+            },
+            {
+                "name": "Razvan Ranca",
+                "role": "CTO",
+                "linkedin_url": "https://www.linkedin.com/in/razvan-ranca-ab81b727",
+            },
+        ],
     }

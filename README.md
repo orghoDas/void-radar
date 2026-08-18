@@ -59,6 +59,7 @@ Phase 5 enriches contacts only from explicit permitted evidence:
 - Manual or provider-supplied contact evidence ingestion
 - Public company website email collection
 - CXO/head/business POC candidate discovery from public pages
+- Entrepreneurs First source ingestion for founder/CXO LinkedIn evidence
 - Contact provenance and duplicate handling
 
 See [docs/phase-05-contact-enrichment.md](docs/phase-05-contact-enrichment.md).

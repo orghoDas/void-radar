@@ -14,7 +14,7 @@ from app.identity.normalize import (
     normalize_domain,
     normalize_location,
 )
-from app.services.source_ingestion import YC_SOURCE_KEY
+from app.services.source_ingestion import ENTREPRENEUR_FIRST_SOURCE_KEY, YC_SOURCE_KEY
 
 
 @dataclass(frozen=True)
@@ -36,7 +36,34 @@ def process_yc_source_records(
     db: Session,
     limit: int | None = None,
 ) -> IdentityResolutionSummary:
-    rows = load_yc_source_records(db, limit=limit)
+    return process_source_records(
+        db,
+        source_key=YC_SOURCE_KEY,
+        limit=limit,
+        allow_name_only_company=False,
+    )
+
+
+def process_entrepreneur_first_source_records(
+    db: Session,
+    limit: int | None = None,
+) -> IdentityResolutionSummary:
+    return process_source_records(
+        db,
+        source_key=ENTREPRENEUR_FIRST_SOURCE_KEY,
+        limit=limit,
+        allow_name_only_company=True,
+    )
+
+
+def process_source_records(
+    db: Session,
+    *,
+    source_key: str,
+    limit: int | None = None,
+    allow_name_only_company: bool = False,
+) -> IdentityResolutionSummary:
+    rows = load_source_records(db, source_key=source_key, limit=limit)
 
     companies_created = 0
     companies_matched = 0
@@ -64,6 +91,7 @@ def process_yc_source_records(
                 db,
                 company_id=str(row.company_id),
                 payload=payload,
+                source_key=source_key,
             )
             founders_created += founder_result.founders_created
             founder_links_created += founder_result.links_created
@@ -83,6 +111,7 @@ def process_yc_source_records(
             review_items_created += create_review_item(
                 db,
                 source_record_id=source_record_id,
+                source_key=source_key,
                 reason="missing_company_name",
                 normalized_name=None,
                 normalized_domain=domain,
@@ -96,25 +125,40 @@ def process_yc_source_records(
             continue
 
         if not domain:
-            review_items_created += create_review_item(
-                db,
-                source_record_id=source_record_id,
-                reason="missing_domain",
-                normalized_name=company_name,
-                normalized_domain=None,
-            )
-            mark_source_record_processed(
-                db,
-                source_record_id=source_record_id,
-                status="review_required",
-                notes="Missing official domain.",
-            )
-            continue
+            if not allow_name_only_company:
+                review_items_created += create_review_item(
+                    db,
+                    source_record_id=source_record_id,
+                    source_key=source_key,
+                    reason="missing_domain",
+                    normalized_name=company_name,
+                    normalized_domain=None,
+                )
+                mark_source_record_processed(
+                    db,
+                    source_record_id=source_record_id,
+                    status="review_required",
+                    notes="Missing official domain.",
+                )
+                continue
 
-        company_id = find_company_by_domain(db, domain)
-        if company_id:
+            company_id = find_company_by_name(db, company_name)
+            if company_id:
+                companies_matched += 1
+                update_company_from_source(db, company_id=company_id, payload=payload)
+            else:
+                company_id = create_company_from_source(
+                    db,
+                    payload=payload,
+                    company_name=company_name,
+                    domain=None,
+                )
+                companies_created += 1
+            link_notes = f"Linked by exact source company name {company_name}."
+        elif company_id := find_company_by_domain(db, domain):
             companies_matched += 1
             update_company_from_source(db, company_id=company_id, payload=payload)
+            link_notes = f"Linked by canonical domain {domain}."
         else:
             company_id = create_company_from_source(
                 db,
@@ -123,6 +167,7 @@ def process_yc_source_records(
                 domain=domain,
             )
             companies_created += 1
+            link_notes = f"Linked by canonical domain {domain}."
 
         aliases_created += ensure_company_alias(
             db,
@@ -130,9 +175,15 @@ def process_yc_source_records(
             alias=company_name,
             alias_type="name",
             confidence=1,
+            source_key=source_key,
         )
 
-        aliases_created += ensure_source_aliases(db, company_id=company_id, payload=payload)
+        aliases_created += ensure_source_aliases(
+            db,
+            company_id=company_id,
+            payload=payload,
+            source_key=source_key,
+        )
         source_identities_created += ensure_source_identity(
             db,
             company_id=company_id,
@@ -140,7 +191,12 @@ def process_yc_source_records(
             external_id=str(row.source_record_id),
             source_url=str(row.source_url) if row.source_url else None,
         )
-        founder_result = ensure_founders(db, company_id=company_id, payload=payload)
+        founder_result = ensure_founders(
+            db,
+            company_id=company_id,
+            payload=payload,
+            source_key=source_key,
+        )
         founders_created += founder_result.founders_created
         founder_links_created += founder_result.links_created
         founder_profiles_created += founder_result.profiles_created
@@ -149,13 +205,13 @@ def process_yc_source_records(
             db,
             source_record_id=source_record_id,
             status="linked",
-            notes=f"Linked by canonical domain {domain}.",
+            notes=link_notes,
         )
 
     db.commit()
 
     return IdentityResolutionSummary(
-        source=YC_SOURCE_KEY,
+        source=source_key,
         scanned=len(rows),
         companies_created=companies_created,
         companies_matched=companies_matched,
@@ -170,8 +226,17 @@ def process_yc_source_records(
 
 
 def load_yc_source_records(db: Session, limit: int | None) -> list[Any]:
+    return load_source_records(db, source_key=YC_SOURCE_KEY, limit=limit)
+
+
+def load_source_records(
+    db: Session,
+    *,
+    source_key: str,
+    limit: int | None,
+) -> list[Any]:
     limit_clause = "limit :limit" if limit else ""
-    params = {"source_key": YC_SOURCE_KEY}
+    params = {"source_key": source_key}
     if limit:
         params["limit"] = limit
 
@@ -217,11 +282,28 @@ def find_company_by_domain(db: Session, domain: str) -> str | None:
     return str(company_id) if company_id else None
 
 
+def find_company_by_name(db: Session, company_name: str) -> str | None:
+    company_id = db.execute(
+        text(
+            """
+            select id
+            from companies
+            where lower(canonical_name) = lower(:company_name)
+            order by created_at
+            limit 1
+            """
+        ),
+        {"company_name": company_name},
+    ).scalar_one_or_none()
+
+    return str(company_id) if company_id else None
+
+
 def create_company_from_source(
     db: Session,
     payload: dict[str, Any],
     company_name: str,
-    domain: str,
+    domain: str | None,
 ) -> str:
     company_id = str(uuid4())
     now = datetime.now(UTC)
@@ -318,6 +400,7 @@ def ensure_source_aliases(
     db: Session,
     company_id: str,
     payload: dict[str, Any],
+    source_key: str,
 ) -> int:
     aliases_created = 0
     raw_payload = payload.get("raw_source_payload") or {}
@@ -330,6 +413,7 @@ def ensure_source_aliases(
             alias=alias,
             alias_type="former_name",
             confidence=0.95,
+            source_key=source_key,
         )
 
     return aliases_created
@@ -430,6 +514,7 @@ def ensure_founders(
     db: Session,
     company_id: str,
     payload: dict[str, Any],
+    source_key: str,
 ) -> FounderResult:
     founders_created = 0
     links_created = 0
@@ -457,6 +542,7 @@ def ensure_founders(
             founder_id=founder_id,
             founder=founder,
             source_url=payload.get("source_url"),
+            source_key=source_key,
         )
 
     return FounderResult(
@@ -573,6 +659,7 @@ def ensure_founder_profile(
     founder_id: str,
     founder: dict[str, Any],
     source_url: str | None,
+    source_key: str,
 ) -> int:
     profile_url = founder.get("profile_url")
     linkedin_url = founder.get("linkedin_url")
@@ -599,7 +686,7 @@ def ensure_founder_profile(
         ),
         {
             "founder_id": founder_id,
-            "source": YC_SOURCE_KEY,
+            "source": source_key,
             "profile_url": profile_url,
             "linkedin_url": linkedin_url,
             "x_url": x_url,
@@ -650,7 +737,7 @@ def ensure_founder_profile(
             "id": str(uuid4()),
             "founder_id": founder_id,
             "company_id": company_id,
-            "source": YC_SOURCE_KEY,
+            "source": source_key,
             "source_url": source_url,
             "profile_url": profile_url,
             "linkedin_url": linkedin_url,
@@ -672,6 +759,7 @@ def ensure_company_alias(
     alias: str | None,
     alias_type: str,
     confidence: float,
+    source_key: str,
 ) -> int:
     normalized_alias = normalize_company_display_name(alias)
     if not normalized_alias:
@@ -726,7 +814,7 @@ def ensure_company_alias(
             "company_id": company_id,
             "alias": normalized_alias,
             "alias_type": alias_type,
-            "source": YC_SOURCE_KEY,
+            "source": source_key,
             "confidence": confidence,
             "created_at": datetime.now(UTC),
         },
@@ -784,6 +872,7 @@ def mark_source_record_processed(
 def create_review_item(
     db: Session,
     source_record_id: str,
+    source_key: str,
     reason: str,
     normalized_name: str | None,
     normalized_domain: str | None,
@@ -809,7 +898,7 @@ def create_review_item(
         {
             "id": str(uuid4()),
             "source_record_id": source_record_id,
-            "source": YC_SOURCE_KEY,
+            "source": source_key,
             "reason": reason,
             "normalized_name": normalized_name,
             "normalized_domain": normalized_domain,

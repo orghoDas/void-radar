@@ -2,14 +2,24 @@ import hashlib
 import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import Protocol
 from uuid import uuid4
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.schemas.ingestion import YCCompanyRecord
+from app.schemas.ingestion import EntrepreneurFirstCompanyRecord, YCCompanyRecord
 
 YC_SOURCE_KEY = "y_combinator"
+ENTREPRENEUR_FIRST_SOURCE_KEY = "entrepreneur_first"
+
+
+class SourceCompanyRecord(Protocol):
+    source_company_id: str
+    source_url: object
+
+    def model_dump(self, *args, **kwargs) -> dict:
+        ...
 
 
 @dataclass(frozen=True)
@@ -21,11 +31,61 @@ class IngestionSummary:
     duplicates: int
 
 
+@dataclass(frozen=True)
+class SourceMetadata:
+    source_key: str
+    name: str
+    source_type: str
+    base_url: str
+    terms_url: str | None
+
+
+YC_SOURCE_METADATA = SourceMetadata(
+    source_key=YC_SOURCE_KEY,
+    name="Y Combinator",
+    source_type="trusted_company_source",
+    base_url="https://www.ycombinator.com/companies",
+    terms_url="https://www.ycombinator.com/legal",
+)
+
+ENTREPRENEUR_FIRST_SOURCE_METADATA = SourceMetadata(
+    source_key=ENTREPRENEUR_FIRST_SOURCE_KEY,
+    name="Entrepreneurs First",
+    source_type="trusted_company_source",
+    base_url="https://www.joinef.com/portfolio/",
+    terms_url="https://www.joinef.com/terms-of-use/",
+)
+
+
 def ingest_yc_source_records(
     db: Session,
     records: list[YCCompanyRecord],
 ) -> IngestionSummary:
-    source_id = ensure_yc_source(db)
+    return ingest_source_records(
+        db,
+        records=records,
+        source_metadata=YC_SOURCE_METADATA,
+    )
+
+
+def ingest_entrepreneur_first_source_records(
+    db: Session,
+    records: list[EntrepreneurFirstCompanyRecord],
+) -> IngestionSummary:
+    return ingest_source_records(
+        db,
+        records=records,
+        source_metadata=ENTREPRENEUR_FIRST_SOURCE_METADATA,
+    )
+
+
+def ingest_source_records(
+    db: Session,
+    *,
+    records: list[SourceCompanyRecord],
+    source_metadata: SourceMetadata,
+) -> IngestionSummary:
+    source_id = ensure_source(db, source_metadata)
     inserted = 0
     updated = 0
     duplicates = 0
@@ -67,7 +127,7 @@ def ingest_yc_source_records(
     db.commit()
 
     return IngestionSummary(
-        source=YC_SOURCE_KEY,
+        source=source_metadata.source_key,
         received=len(records),
         inserted=inserted,
         updated=updated,
@@ -76,9 +136,17 @@ def ingest_yc_source_records(
 
 
 def ensure_yc_source(db: Session) -> str:
+    return ensure_source(db, YC_SOURCE_METADATA)
+
+
+def ensure_entrepreneur_first_source(db: Session) -> str:
+    return ensure_source(db, ENTREPRENEUR_FIRST_SOURCE_METADATA)
+
+
+def ensure_source(db: Session, source_metadata: SourceMetadata) -> str:
     existing = db.execute(
         text("select id from sources where source_key = :source_key"),
-        {"source_key": YC_SOURCE_KEY},
+        {"source_key": source_metadata.source_key},
     ).scalar_one_or_none()
 
     if existing:
@@ -115,11 +183,11 @@ def ensure_yc_source(db: Session) -> str:
         ),
         {
             "id": source_id,
-            "source_key": YC_SOURCE_KEY,
-            "name": "Y Combinator",
-            "source_type": "trusted_company_source",
-            "base_url": "https://www.ycombinator.com/companies",
-            "terms_url": "https://www.ycombinator.com/legal",
+            "source_key": source_metadata.source_key,
+            "name": source_metadata.name,
+            "source_type": source_metadata.source_type,
+            "base_url": source_metadata.base_url,
+            "terms_url": source_metadata.terms_url,
             "enabled": True,
             "created_at": now,
             "updated_at": now,

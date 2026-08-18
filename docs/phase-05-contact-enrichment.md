@@ -152,6 +152,50 @@ Example `contacts.json`:
 }
 ```
 
+Compare additional accelerator portfolio sources against the local YC baseline:
+
+```bash
+DATABASE_URL='postgresql+psycopg:///void_radar?host=/tmp' \
+  backend/.venv/bin/python scripts/probe_accelerator_sources.py \
+    --cache-dir /private/tmp \
+    --use-cache \
+    --include-yc-baseline \
+    --limit 50
+```
+
+The source probe is read-only. It measures visible company, website, founder or
+decision-maker, LinkedIn, and email coverage before creating a dedicated actor
+or ingestion path.
+
+Ingest Entrepreneurs First portfolio records:
+
+```bash
+backend/.venv/bin/python scripts/ingest_entrepreneur_first_dataset.py \
+  /private/tmp/ef-portfolio.html \
+  --dry-run
+```
+
+When the dry-run records look correct, post them to the backend:
+
+```bash
+backend/.venv/bin/python scripts/ingest_entrepreneur_first_dataset.py \
+  /private/tmp/ef-portfolio.html
+```
+
+Process stored Entrepreneurs First source records into companies, founders, and
+founder profiles:
+
+```bash
+DATABASE_URL='postgresql+psycopg:///void_radar?host=/tmp' \
+  backend/.venv/bin/python scripts/process_entrepreneur_first_source_records.py
+```
+
+Entrepreneurs First currently provides strong founder/CXO names and LinkedIn
+URLs, but does not consistently expose official company websites on the public
+portfolio listing. Its processor can create name-only candidate companies so
+the founder evidence is usable immediately; official domains should be filled
+by later website/profile enrichment.
+
 ## Acceptance Criteria
 
 - Public/manual/provider email evidence can be ingested.

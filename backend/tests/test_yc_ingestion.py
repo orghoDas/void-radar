@@ -88,6 +88,37 @@ def test_ingests_yc_source_records() -> None:
     assert stored_count == 1
 
 
+def test_ingests_entrepreneur_first_source_records() -> None:
+    client, db = make_client()
+
+    response = client.post(
+        "/ingestion/entrepreneur-first/source-records",
+        json={"records": [entrepreneur_first_record()]},
+    )
+
+    assert response.status_code == 201
+    assert response.json() == {
+        "source": "entrepreneur_first",
+        "received": 1,
+        "inserted": 1,
+        "updated": 0,
+        "duplicates": 0,
+    }
+
+    stored = db.execute(
+        text(
+            """
+            select s.source_key, sr.source_record_id, sr.raw_payload
+            from source_records sr
+            join sources s on s.id = sr.source_id
+            """
+        )
+    ).one()
+    assert stored.source_key == "entrepreneur_first"
+    assert stored.source_record_id == "tractable"
+    assert "Alex Dalyac" in stored.raw_payload
+
+
 def test_ingestion_is_idempotent_by_source_record_id() -> None:
     client, db = make_client()
     payload = {"records": [yc_record()]}
@@ -172,4 +203,29 @@ def yc_record() -> dict:
         "description": "AI workflow platform for operations teams.",
         "tags": ["b2b", "saas", "ai"],
         "founders": [{"name": "Jane Founder"}],
+    }
+
+
+def entrepreneur_first_record() -> dict:
+    return {
+        "source": "entrepreneur_first",
+        "source_url": "https://www.joinef.com/portfolio/#tractable",
+        "source_company_id": "tractable",
+        "company_name": "Tractable",
+        "website": None,
+        "location": "London",
+        "industry": "Automotive & Mobility, Insurance",
+        "batch": None,
+        "stage": None,
+        "status": None,
+        "employee_count": None,
+        "description": "AI for accident and disaster recovery.",
+        "tags": ["Automotive & Mobility", "Insurance"],
+        "founders": [
+            {
+                "name": "Alex Dalyac",
+                "role": "Founding CEO",
+                "linkedin_url": "https://www.linkedin.com/in/adalyac/",
+            }
+        ],
     }
