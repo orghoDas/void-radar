@@ -79,6 +79,32 @@ POST /contacts/enrichment/founder-profiles/backfill
 
 ## CLI
 
+Collect public emails from company websites:
+
+```bash
+DATABASE_URL='postgresql+psycopg:///void_radar?host=/tmp' \
+  backend/.venv/bin/python scripts/enrich_contacts_from_websites.py \
+    --limit 10 \
+    --dry-run
+```
+
+When the dry-run output looks good, run without `--dry-run`:
+
+```bash
+DATABASE_URL='postgresql+psycopg:///void_radar?host=/tmp' \
+  backend/.venv/bin/python scripts/enrich_contacts_from_websites.py \
+    --limit 10
+```
+
+The website collector checks only a small fixed list of public company pages and
+stores explicit emails as company-level evidence. By default it skips generic
+mailboxes like `sales@`, `support@`, and `info@`, and skips emails outside the
+company domain. Use `--include-generic` or `--include-external-emails` when a
+manual review workflow needs broader collection. It does not guess founder email
+ownership.
+
+Ingest manually verified or provider-supplied evidence:
+
 ```bash
 DATABASE_URL='postgresql+psycopg:///void_radar?host=/tmp' \
   backend/.venv/bin/python scripts/ingest_contact_evidence.py contacts.json
@@ -109,3 +135,4 @@ Example `contacts.json`:
 - Duplicate evidence does not create duplicate evidence rows.
 - Existing contacts are updated rather than duplicated.
 - All contacts keep source URL and verification metadata.
+- Website collection supports dry-run before writing contacts.

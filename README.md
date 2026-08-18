@@ -53,3 +53,11 @@ Phase 4 turns raw source records into canonical identities:
 - Review state for ambiguous records
 
 See [docs/phase-04-identity-resolution.md](docs/phase-04-identity-resolution.md).
+
+Phase 5 enriches contacts only from explicit permitted evidence:
+
+- Manual or provider-supplied contact evidence ingestion
+- Public company website email collection
+- Contact provenance and duplicate handling
+
+See [docs/phase-05-contact-enrichment.md](docs/phase-05-contact-enrichment.md).
