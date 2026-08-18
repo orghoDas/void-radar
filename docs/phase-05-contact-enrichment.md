@@ -10,6 +10,7 @@ public/permitted evidence
   -> resolve or create founder link when a founder name is provided
   -> contacts
   -> contact_enrichment_evidence
+  -> decision_maker_candidates for CXO/head/business POC evidence
 ```
 
 ## Policy
@@ -54,6 +55,18 @@ Adds:
 
 ```text
 contact_enrichment_evidence
+```
+
+Decision-maker candidate migration:
+
+```text
+database/migrations/0006_decision_maker_candidates.sql
+```
+
+Adds:
+
+```text
+decision_maker_candidates
 ```
 
 ## API
@@ -103,6 +116,18 @@ company domain. Use `--include-generic` or `--include-external-emails` when a
 manual review workflow needs broader collection. It does not guess founder email
 ownership.
 
+The same collector also scans public page text for decision-maker titles:
+
+- Founder / co-founder / CEO
+- COO / CMO / CRO / CBO / other chief officer roles
+- Head of Business / Growth / Partnerships / Sales / Revenue
+- Head of Product / Marketing / Operations
+- VP or Director roles in the same business-facing functions
+
+Those people are stored as `decision_maker_candidates`. A candidate can exist
+without an email, because names and roles are still useful for LinkedIn/manual
+research. Email evidence remains separate and must still be explicit.
+
 Ingest manually verified or provider-supplied evidence:
 
 ```bash
@@ -136,3 +161,4 @@ Example `contacts.json`:
 - Existing contacts are updated rather than duplicated.
 - All contacts keep source URL and verification metadata.
 - Website collection supports dry-run before writing contacts.
+- Website collection captures CXO/head/business POC candidates with source URL.

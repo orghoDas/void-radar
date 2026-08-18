@@ -7,9 +7,13 @@ from scripts.enrich_contacts_from_websites import (
     CompanyTarget,
     WebsiteEnrichmentSummary,
     collect_company_contact_records,
+    collect_company_decision_makers,
     company_urls,
+    decision_maker_candidate_from_line,
     enrich_contacts_from_websites,
     fetch_public_page,
+    is_likely_person_name,
+    role_category,
     should_keep_email,
 )
 from sqlalchemy import create_engine, text
@@ -142,6 +146,29 @@ def make_session() -> Session:
         connection.execute(
             text(
                 """
+                create table decision_maker_candidates (
+                    id text primary key,
+                    company_id text not null,
+                    full_name text,
+                    role text not null,
+                    role_category text not null,
+                    email text,
+                    linkedin_url text,
+                    x_url text,
+                    profile_url text,
+                    source_type text not null,
+                    source_url text not null,
+                    confidence numeric not null default 0.5,
+                    raw_evidence text not null default '{}',
+                    created_at timestamp not null,
+                    updated_at timestamp not null
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
                 insert into companies (
                     id,
                     canonical_name,
@@ -205,6 +232,68 @@ def test_should_keep_email_defaults_to_person_like_same_domain_emails() -> None:
     )
 
 
+def test_decision_maker_candidate_from_line_captures_business_roles() -> None:
+    candidate = decision_maker_candidate_from_line(
+        company=CompanyTarget(
+            id="company-1",
+            canonical_name="Example AI",
+            canonical_domain="example.ai",
+        ),
+        line="Jane Founder, Head of Growth jane@example.ai",
+        source_url="https://example.ai/team",
+        content_type="text/html",
+        http_status=200,
+    )
+
+    assert candidate is not None
+    assert candidate.full_name == "Jane Founder"
+    assert candidate.role == "Head Of Growth"
+    assert candidate.role_category == "growth"
+    assert candidate.email == "jane@example.ai"
+
+
+def test_role_category_covers_cxo_and_business_poc_roles() -> None:
+    assert role_category("COO") == "executive"
+    assert role_category("Head Of Business") == "business"
+    assert role_category("VP Partnerships") == "partnerships"
+    assert role_category("Head Of Product") == "product"
+
+
+def test_is_likely_person_name_rejects_obvious_non_people() -> None:
+    assert is_likely_person_name("Jane Founder")
+    assert not is_likely_person_name("Board Member")
+    assert not is_likely_person_name("Hamilton Vascular Clinic")
+
+
+def test_collect_company_decision_makers_extracts_candidates() -> None:
+    def opener(request, timeout):
+        del timeout
+        if request.full_url.endswith("/team"):
+            return FakeResponse(
+                body="<h2>Alex Kim</h2><p>Chief Revenue Officer</p>",
+                url=request.full_url,
+            )
+        return FakeResponse(body="No team here.", url=request.full_url)
+
+    summary = empty_summary()
+    candidates = collect_company_decision_makers(
+        CompanyTarget(
+            id="company-1",
+            canonical_name="Example AI",
+            canonical_domain="example.ai",
+        ),
+        paths=("/", "/team"),
+        timeout=3,
+        opener=opener,
+        summary=summary,
+    )
+
+    assert len(candidates) == 1
+    assert candidates[0].full_name == "Alex Kim"
+    assert candidates[0].role == "Chief Revenue Officer"
+    assert candidates[0].role_category == "executive"
+
+
 def test_collect_company_contact_records_extracts_public_emails() -> None:
     def opener(request, timeout):
         del timeout
@@ -253,9 +342,55 @@ def test_enrich_contacts_from_websites_dry_run_does_not_write_contacts() -> None
 
     assert summary.companies_scanned == 1
     assert summary.contact_records_prepared == 1
+    assert summary.decision_maker_candidates_found == 0
     assert summary.dry_run_records[0]["email"] == "jane@example.ai"
     contact_count = db.execute(text("select count(*) from contacts")).scalar_one()
     assert contact_count == 0
+
+
+def test_enrich_contacts_from_websites_dry_run_lists_decision_makers() -> None:
+    db = make_session()
+
+    def opener(_request, timeout):
+        del timeout
+        return FakeResponse(body="Priya Shah - Head of Partnerships")
+
+    summary = enrich_contacts_from_websites(
+        db,
+        limit=1,
+        dry_run=True,
+        delay_seconds=0,
+        paths=("/team",),
+        opener=opener,
+    )
+
+    assert summary.decision_maker_candidates_found == 1
+    assert summary.dry_run_decision_makers[0]["full_name"] == "Priya Shah"
+    candidate_count = db.execute(
+        text("select count(*) from decision_maker_candidates")
+    ).scalar_one()
+    assert candidate_count == 0
+
+
+def test_enrich_contacts_from_websites_can_target_domains() -> None:
+    db = make_session()
+
+    def opener(_request, timeout):
+        del timeout
+        return FakeResponse(body="Priya Shah - Head of Partnerships")
+
+    summary = enrich_contacts_from_websites(
+        db,
+        limit=10,
+        dry_run=True,
+        delay_seconds=0,
+        paths=("/team",),
+        domains=("missing.example",),
+        opener=opener,
+    )
+
+    assert summary.companies_scanned == 0
+    assert summary.decision_maker_candidates_found == 0
 
 
 def test_enrich_contacts_from_websites_ingests_contacts() -> None:
@@ -278,6 +413,31 @@ def test_enrich_contacts_from_websites_ingests_contacts() -> None:
     assert summary.evidence_created == 1
     stored_email = db.execute(text("select email from contacts")).scalar_one()
     assert stored_email == "jane@example.ai"
+
+
+def test_enrich_contacts_from_websites_ingests_decision_makers() -> None:
+    db = make_session()
+
+    def opener(_request, timeout):
+        del timeout
+        return FakeResponse(body="Maya Lee - COO")
+
+    summary = enrich_contacts_from_websites(
+        db,
+        limit=1,
+        dry_run=False,
+        delay_seconds=0,
+        paths=("/team",),
+        opener=opener,
+    )
+
+    assert summary.decision_maker_candidates_inserted == 1
+    candidate = db.execute(
+        text("select full_name, role, role_category from decision_maker_candidates")
+    ).one()
+    assert candidate.full_name == "Maya Lee"
+    assert candidate.role == "COO"
+    assert candidate.role_category == "executive"
 
 
 def empty_summary():
