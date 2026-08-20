@@ -1,0 +1,70 @@
+{
+  "title": "ATS Jobs Enricher Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "boards": {
+      "title": "ATS boards",
+      "type": "array",
+      "description": "Detected ATS board records from ats-board-detector or backend ats_boards.",
+      "editor": "json",
+      "default": [
+        {
+          "company_id": null,
+          "domain": "snout.com",
+          "ats_provider": "generic",
+          "board_token": "jobs.gem.com/snout",
+          "board_url": "https://jobs.gem.com/snout",
+          "careers_url": "https://jobs.gem.com/snout"
+        },
+        {
+          "company_id": null,
+          "domain": "marpledata.com",
+          "ats_provider": "generic",
+          "board_token": "app.notion.com/p/getmarple/careers-marple-3c2fa12cc1cf80baabe9d647aaeaf17b",
+          "board_url": "https://app.notion.com/p/getmarple/Careers-Marple-3c2fa12cc1cf80baabe9d647aaeaf17b?source=copy_link",
+          "careers_url": "https://app.notion.com/p/getmarple/Careers-Marple-3c2fa12cc1cf80baabe9d647aaeaf17b?source=copy_link"
+        }
+      ]
+    },
+    "maxBoards": {
+      "title": "Maximum boards",
+      "type": "integer",
+      "description": "Maximum board records to process.",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "maxJobsPerBoard": {
+      "title": "Maximum jobs per board",
+      "type": "integer",
+      "description": "Maximum jobs to emit from each board.",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "requestDelayMs": {
+      "title": "Request delay",
+      "type": "integer",
+      "description": "Delay between board requests in milliseconds.",
+      "default": 250,
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "requestTimeoutMs": {
+      "title": "Request timeout",
+      "type": "integer",
+      "description": "Maximum time to wait for each board/API request.",
+      "default": 8000,
+      "minimum": 1000,
+      "maximum": 60000
+    },
+    "includeGenericHtml": {
+      "title": "Include generic HTML parser",
+      "type": "boolean",
+      "description": "Attempt deterministic HTML extraction for generic careers pages.",
+      "default": true
+    }
+  },
+  "required": []
+}

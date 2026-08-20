@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "apollo-verified-contact-enricher",
+  "title": "Apollo Verified Contact Enricher",
+  "description": "Finds and enriches verified Apollo contacts for scored Void Radar company targets.",
+  "version": "0.1",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

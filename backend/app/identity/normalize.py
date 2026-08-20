@@ -4,6 +4,8 @@ import re
 from dataclasses import dataclass
 from urllib.parse import urlparse
 
+from app.identity.tld_data import IANA_TLDS
+
 
 COMPANY_SUFFIX_PATTERN = re.compile(
     r"\b(inc|inc\.|llc|ltd|ltd\.|limited|corp|corp\.|corporation|co|co\.|"
@@ -37,6 +39,31 @@ def normalize_company_match_name(value: str | None) -> str | None:
     return normalized or None
 
 
+# Discovery sources that read domains out of free text produce hostnames whose
+# suffix is the next word in the sentence: "...our process.We are hiring" parses
+# as "process.we", and "middesk.com at" as "middesk.comat". Validating the suffix
+# against IANA rejects the first shape and repairs the second.
+GLUED_SUFFIX_PATTERN = re.compile(
+    r"^(?P<host>.+\.(?:com|org|net|io|ai|dev|co))(?P<extra>[a-z]{2,10})$"
+)
+
+
+def has_valid_tld(hostname: str) -> bool:
+    return hostname.rpartition(".")[2] in IANA_TLDS
+
+
+def repair_glued_suffix(hostname: str) -> str:
+    """Recover ``middesk.comat`` -> ``middesk.com``.
+
+    Only attempted when the suffix is already invalid, so a genuine domain such
+    as ``cockpit.at`` is never truncated.
+    """
+    if has_valid_tld(hostname):
+        return hostname
+    match = GLUED_SUFFIX_PATTERN.match(hostname)
+    return match.group("host") if match else hostname
+
+
 def normalize_domain(value: str | None) -> str | None:
     if not value:
         return None
@@ -57,7 +84,14 @@ def normalize_domain(value: str | None) -> str | None:
     if hostname.startswith("www."):
         hostname = hostname[4:]
 
-    return hostname or None
+    if not hostname or "." not in hostname:
+        return None
+
+    hostname = repair_glued_suffix(hostname)
+    if not has_valid_tld(hostname):
+        return None
+
+    return hostname
 
 
 def normalize_location(value: str | None) -> NormalizedLocation:

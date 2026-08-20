@@ -1,0 +1,24 @@
+[
+  {
+    "company_id": "uuid-or-null",
+    "domain": "example.com",
+    "ats_provider": "greenhouse",
+    "board_token": "example",
+    "board_url": "https://boards.greenhouse.io/example",
+    "external_job_id": "123",
+    "title": "Senior Backend Engineer",
+    "department": "Engineering",
+    "location": "Remote",
+    "remote_policy": "remote",
+    "employment_type": "full_time",
+    "posted_at": "2026-08-20T10:00:00.000Z",
+    "first_seen_at": "2026-08-20T10:00:00.000Z",
+    "last_seen_at": "2026-08-20T10:00:00.000Z",
+    "url": "https://boards.greenhouse.io/example/jobs/123",
+    "description_text": "Job description text.",
+    "stack_terms": ["python", "postgresql"],
+    "seniority": "senior",
+    "is_active": true,
+    "raw_payload": {}
+  }
+]

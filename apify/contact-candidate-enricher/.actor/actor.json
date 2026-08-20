@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "contact-candidate-enricher",
+  "title": "Contact Candidate Enricher",
+  "description": "Crawls targeted company pages and emits reviewable contact candidates for scored Void Radar companies.",
+  "version": "0.1",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

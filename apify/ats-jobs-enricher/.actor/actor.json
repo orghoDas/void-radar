@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "ats-jobs-enricher",
+  "title": "ATS Jobs Enricher",
+  "description": "Fetches job postings from detected ATS boards and emits normalized records for Void Radar.",
+  "version": "0.1.0",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

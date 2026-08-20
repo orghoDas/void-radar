@@ -1,0 +1,2 @@
+company,domain,segment,country,trigger_type,trigger_summary,trigger_url,role_title,role_age_days,target_person,target_role,email,email_source,email_verification,message_angle,status,outcome,notes
+Example AI,example.ai,B2B SaaS,United States,stale_hiring,Senior Backend Engineer role appears open for 92 days and mentions payments/API integrations,https://boards.greenhouse.io/example-ai/jobs/123,Senior Backend Engineer,92,Jane Doe,VP Engineering,jane@example.ai,verified_provider,provider_verified,Backend hiring bottleneck around payments and integrations,ready,,

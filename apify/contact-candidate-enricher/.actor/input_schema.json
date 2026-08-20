@@ -1,0 +1,75 @@
+{
+  "title": "Contact Candidate Enricher Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "targets": {
+      "title": "Targets",
+      "type": "array",
+      "description": "Scored company targets exported from Void Radar.",
+      "editor": "json",
+      "default": [
+        {
+          "company_id": "example-company-id",
+          "company": "Brain Corp",
+          "domain": "braincorp.com",
+          "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+          "reason_to_write": "Generic job board detected for braincorp.com.",
+          "evidence_urls": "https://www.braincorp.com/careers",
+          "score": 39
+        }
+      ]
+    },
+    "maxItems": {
+      "title": "Maximum companies",
+      "type": "integer",
+      "description": "Maximum number of companies to scan from input.",
+      "default": 25,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "maxPagesPerCompany": {
+      "title": "Maximum pages per company",
+      "type": "integer",
+      "description": "Maximum candidate pages to fetch for each company.",
+      "default": 12,
+      "minimum": 1,
+      "maximum": 40
+    },
+    "requestDelayMs": {
+      "title": "Request delay",
+      "type": "integer",
+      "description": "Delay between company scans in milliseconds.",
+      "default": 500,
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "requestTimeoutMs": {
+      "title": "Request timeout",
+      "type": "integer",
+      "description": "Maximum time to wait for each page request.",
+      "default": 10000,
+      "minimum": 1000,
+      "maximum": 60000
+    },
+    "includeGenericEmails": {
+      "title": "Include generic emails",
+      "type": "boolean",
+      "description": "Include emails like info@, hello@, support@. Keep false for outreach candidates.",
+      "default": false
+    },
+    "includeExternalEmails": {
+      "title": "Include external emails",
+      "type": "boolean",
+      "description": "Include emails whose domain does not match the company domain.",
+      "default": false
+    },
+    "emitMissesToDataset": {
+      "title": "Emit misses to dataset",
+      "type": "boolean",
+      "description": "When true, push no-contact records to the dataset.",
+      "default": true
+    }
+  },
+  "required": []
+}

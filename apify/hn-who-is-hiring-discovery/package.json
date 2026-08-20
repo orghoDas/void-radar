@@ -1,0 +1,13 @@
+{
+  "name": "hn-who-is-hiring-discovery",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node src/main.mjs"
+  },
+  "dependencies": {
+    "apify": "^3.2.6",
+    "cheerio": "^1.0.0"
+  }
+}

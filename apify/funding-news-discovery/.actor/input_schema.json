@@ -1,0 +1,44 @@
+{
+  "title": "Funding News Discovery Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "maxItems": {
+      "title": "Maximum records",
+      "type": "integer",
+      "description": "Maximum number of standardized discovery records to output.",
+      "default": 50,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "feeds": {
+      "title": "RSS or Atom feeds",
+      "type": "array",
+      "description": "Public funding/news feeds to inspect.",
+      "editor": "json",
+      "default": [
+        {
+          "source": "funding_news",
+          "sourceName": "Funding News",
+          "url": "https://www.uktech.news/feed",
+          "eventType": "funding"
+        }
+      ]
+    },
+    "includeArticleFetch": {
+      "title": "Fetch linked articles",
+      "type": "boolean",
+      "description": "Fetch article pages to improve domain extraction when the feed item does not expose an official company URL.",
+      "default": false
+    },
+    "requestDelayMs": {
+      "title": "Request delay",
+      "type": "integer",
+      "description": "Delay between feed/article requests in milliseconds.",
+      "default": 500,
+      "minimum": 0,
+      "maximum": 10000
+    }
+  },
+  "required": []
+}

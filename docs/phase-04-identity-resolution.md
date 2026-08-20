@@ -1,5 +1,9 @@
 # Void Radar Phase 4 Identity Resolution
 
+> Status: retained foundation, not the active implementation plan. Domain-first
+> identity resolution remains important, but the active build order is
+> [signal-first-apify-roadmap.md](signal-first-apify-roadmap.md).
+
 Phase 4 turns raw trusted source records into canonical company identities.
 
 ```text
@@ -99,8 +103,8 @@ matching can be added later once we have review UI and evidence display.
 
 Founder emails are not inferred. Store direct founder emails only when a public
 or permitted enrichment source provides them with source URL and confidence.
-YC profile links are useful outreach leads, but should be verified before
-contacting.
+YC/EF profile links are legacy evidence only and should not drive the active MVP
+pipeline.
 
 ## Run Locally
 
@@ -133,7 +137,7 @@ Apply migrations:
   -f database/migrations/0004_founder_profiles.sql
 ```
 
-Process YC source records:
+Legacy only: process YC source records:
 
 ```bash
 DATABASE_URL='postgresql+psycopg:///void_radar?host=/tmp' \
@@ -157,7 +161,7 @@ POST /identity/y-combinator/process-source-records?limit=10
 Phase 4 is complete when:
 
 - Normalizers are tested.
-- YC source records can create canonical companies.
+- Legacy YC source records can create canonical companies.
 - Source records are linked to company IDs.
 - Company aliases are preserved.
 - Source identities are preserved.

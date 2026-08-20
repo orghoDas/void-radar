@@ -1,0 +1,138 @@
+{
+  "title": "Apollo Verified Contact Enricher Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "targets": {
+      "title": "Targets",
+      "type": "array",
+      "description": "Scored company targets exported from Void Radar.",
+      "editor": "json",
+      "default": [
+        {
+          "company_id": "7ea08672-4f49-4a65-ba11-082c288be2b9",
+          "company": "Brain Corp",
+          "domain": "braincorp.com",
+          "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+          "reason_to_write": "Generic job board detected for braincorp.com.",
+          "evidence_urls": "https://www.braincorp.com/careers",
+          "score": 39
+        }
+      ]
+    },
+    "apiKeyEnv": {
+      "title": "Apollo API key env var",
+      "type": "string",
+      "description": "Environment variable name containing the Apollo API key.",
+      "editor": "textfield",
+      "default": "APOLLO_API_KEY"
+    },
+    "apolloApiKey": {
+      "title": "Apollo API key",
+      "type": "string",
+      "description": "Optional encrypted Apollo API key input. Use this if you cannot find actor environment variables in Apify Console.",
+      "editor": "textfield",
+      "isSecret": true
+    },
+    "maxItems": {
+      "title": "Maximum companies",
+      "type": "integer",
+      "description": "Maximum number of company targets to process from the input.",
+      "editor": "number",
+      "default": 25,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "perCompanySearchLimit": {
+      "title": "Search results per company",
+      "type": "integer",
+      "description": "Maximum Apollo People Search results to inspect for each company.",
+      "editor": "number",
+      "default": 8,
+      "minimum": 1,
+      "maximum": 25
+    },
+    "maxContactsPerCompany": {
+      "title": "Maximum verified contacts per company",
+      "type": "integer",
+      "description": "Maximum verified provider contacts to emit for each company.",
+      "editor": "number",
+      "default": 2,
+      "minimum": 1,
+      "maximum": 10
+    },
+    "maxEnrichmentsPerRun": {
+      "title": "Maximum paid enrichments per run",
+      "type": "integer",
+      "description": "Hard cap on Apollo enrichment attempts for the whole run.",
+      "editor": "number",
+      "default": 50,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "personTitles": {
+      "title": "Person titles",
+      "type": "array",
+      "description": "Apollo person_titles filters.",
+      "editor": "json",
+      "default": [
+        "Founder",
+        "Co-Founder",
+        "CEO",
+        "Chief Executive Officer",
+        "CTO",
+        "Chief Technology Officer",
+        "VP Engineering",
+        "Vice President Engineering",
+        "Head of Engineering",
+        "Head of Product",
+        "Head of Operations"
+      ]
+    },
+    "personSeniorities": {
+      "title": "Person seniorities",
+      "type": "array",
+      "description": "Apollo person_seniorities filters.",
+      "editor": "json",
+      "default": ["founder", "owner", "c_suite", "vp", "head", "director"]
+    },
+    "requestDelayMs": {
+      "title": "Request delay",
+      "type": "integer",
+      "description": "Delay between company-level enrichment attempts in milliseconds.",
+      "editor": "number",
+      "default": 500,
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "revealPersonalEmails": {
+      "title": "Reveal personal emails",
+      "type": "boolean",
+      "description": "Keep false for work-email outreach.",
+      "editor": "checkbox",
+      "default": false
+    },
+    "revealPhoneNumber": {
+      "title": "Reveal phone number",
+      "type": "boolean",
+      "description": "Keep false; phone enrichment requires webhook handling.",
+      "editor": "checkbox",
+      "default": false
+    },
+    "runWaterfallEmail": {
+      "title": "Run waterfall email",
+      "type": "boolean",
+      "description": "Keep false unless a webhook flow is implemented.",
+      "editor": "checkbox",
+      "default": false
+    },
+    "emitMissesToDataset": {
+      "title": "Emit misses to dataset",
+      "type": "boolean",
+      "description": "When true, emit miss records for companies without verified contacts.",
+      "editor": "checkbox",
+      "default": true
+    }
+  },
+  "required": ["targets"]
+}

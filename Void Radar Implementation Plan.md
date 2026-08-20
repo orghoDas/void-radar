@@ -1,6 +1,15 @@
 # Void Radar  
 ## Concise Step-by-Step Implementation Plan
 
+> Status: legacy/superseded. This was the original YC-first,
+> research-first, dashboard-first build order. The active plan is now
+> [docs/signal-first-apify-roadmap.md](docs/signal-first-apify-roadmap.md),
+> with Phase 0 outreach validation tracked in
+> [docs/outreach-validation-playbook.md](docs/outreach-validation-playbook.md).
+>
+> Keep this document as historical context and foundation reference only. Do
+> not use it to choose current MVP priorities.
+
 ## Phase 1 — Define the Foundation
 
 Before development, define:

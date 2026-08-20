@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "company-researcher",
+  "title": "Company Researcher",
+  "description": "Crawls a small deterministic page set for already qualified Void Radar companies and emits raw page plus evidence fields.",
+  "version": "0.1",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

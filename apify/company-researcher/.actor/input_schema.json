@@ -1,0 +1,70 @@
+{
+  "title": "Company Researcher Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "targets": {
+      "title": "Targets",
+      "type": "array",
+      "description": "Qualified, send-ready company targets exported from Void Radar.",
+      "editor": "json",
+      "default": [
+        {
+          "company_id": "example-company-id",
+          "company": "Example AI",
+          "domain": "example.ai",
+          "contact_id": "example-contact-id",
+          "contact_email": "founder@example.ai",
+          "reason_to_write": "Example AI posted a current hiring signal.",
+          "evidence_urls": "https://news.ycombinator.com/item?id=1",
+          "score": 34
+        }
+      ]
+    },
+    "maxItems": {
+      "title": "Maximum companies",
+      "type": "integer",
+      "description": "Maximum number of companies to research from input.",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 100
+    },
+    "maxPagesPerCompany": {
+      "title": "Maximum pages per company",
+      "type": "integer",
+      "description": "Maximum pages to fetch for each company.",
+      "default": 10,
+      "minimum": 1,
+      "maximum": 30
+    },
+    "requestDelayMs": {
+      "title": "Request delay",
+      "type": "integer",
+      "description": "Delay between company scans in milliseconds.",
+      "default": 500,
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "requestTimeoutMs": {
+      "title": "Request timeout",
+      "type": "integer",
+      "description": "Maximum time to wait for each page request.",
+      "default": 10000,
+      "minimum": 1000,
+      "maximum": 60000
+    },
+    "includePageText": {
+      "title": "Include page text",
+      "type": "boolean",
+      "description": "Include cleaned page text in output so the backend can store raw_pages. Disable only for very large runs.",
+      "default": true
+    },
+    "emitPageRecords": {
+      "title": "Emit page records",
+      "type": "boolean",
+      "description": "Emit one page_research record per fetched page in addition to the company_research summary.",
+      "default": true
+    }
+  },
+  "required": []
+}

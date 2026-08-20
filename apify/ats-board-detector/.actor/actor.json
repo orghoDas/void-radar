@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "ats-board-detector",
+  "title": "ATS Board Detector",
+  "description": "Detects Greenhouse, Lever, Ashby, Workable, and generic careers pages for resolved company domains.",
+  "version": "0.1.0",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

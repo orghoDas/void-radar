@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "hn-who-is-hiring-discovery",
+  "title": "HN Who Is Hiring Discovery",
+  "description": "Collects Hacker News Who is Hiring comments and emits standardized domain discovery records for Void Radar.",
+  "version": "0.1.0",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

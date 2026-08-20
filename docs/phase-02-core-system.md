@@ -1,5 +1,10 @@
 # Void Radar Phase 2 Core System
 
+> Status: retained foundation, not the active implementation plan. The active
+> build order is [signal-first-apify-roadmap.md](signal-first-apify-roadmap.md).
+> Use this file for repo structure, backend boundaries, environment setup, and
+> database foundation only.
+
 Phase 2 creates the project skeleton, backend API foundation, configuration
 pattern, and canonical database schema foundation.
 
@@ -98,4 +103,3 @@ Phase 2 is complete when:
 - Database migration `0001_core_schema.sql` captures the core data model.
 - External service secrets are represented only as environment variables.
 - Apify, frontend, and n8n have clear placeholder boundaries for later phases.
-

@@ -1,0 +1,54 @@
+{
+  "targets": [
+    {
+      "company_id": "39358f97-7f35-4a58-9126-3f64ae24df97",
+      "company": "Tasklet",
+      "domain": "tasklet.ai",
+      "contact_id": "41465dc1-7a1b-4162-9bf4-3060cc5833d2",
+      "contact_email": "andrew@tasklet.ai",
+      "contact_name": "",
+      "contact_role": "CEO",
+      "reason_to_write": "Tasklet posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49159942",
+      "score": 34,
+      "fit_score": 73,
+      "intent_score": 46,
+      "score_id": "dc505499-3952-4b0e-8bb8-13098ac20544"
+    },
+    {
+      "company_id": "f7a81e8d-180f-49f3-857c-52fb586547fb",
+      "company": "Harmony AI",
+      "domain": "tryharmony.ai",
+      "contact_id": "e10a0989-3d9f-4d19-86c8-185c7c4a6446",
+      "contact_email": "george@tryharmony.ai",
+      "contact_name": "",
+      "contact_role": "",
+      "reason_to_write": "Harmony AI posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163301",
+      "score": 23,
+      "fit_score": 49,
+      "intent_score": 46,
+      "score_id": "f1c71021-0dd9-483a-addb-a7c23933ba78"
+    },
+    {
+      "company_id": "bdb8db85-3757-499c-a2a2-ef085ffe8b3e",
+      "company": "Performance",
+      "domain": "performance.fyi",
+      "contact_id": "990eb7a1-691e-4d9b-9479-367ee5922312",
+      "contact_email": "greg@performance.fyi",
+      "contact_name": "",
+      "contact_role": "",
+      "reason_to_write": "Performance posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49164538",
+      "score": 23,
+      "fit_score": 49,
+      "intent_score": 46,
+      "score_id": "69dbda55-22c7-4936-ac91-8650bb6df495"
+    }
+  ],
+  "maxItems": 3,
+  "maxPagesPerCompany": 10,
+  "requestDelayMs": 500,
+  "includePageText": true,
+  "emitPageRecords": true
+}

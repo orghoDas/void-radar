@@ -9,57 +9,62 @@ Which companies should Void investigate, what could Void offer them, why does
 the opportunity make sense, and why might now be a good time?
 ```
 
-The project will be built phase by phase. The first milestone is one complete
-YC-to-scoring loop before adding more sources, contact enrichment, monitoring,
-automation, or outreach.
+The project will be built phase by phase. The primary milestone is now a
+signal-first Apify pipeline that finds companies with current buying triggers,
+especially stale technical/product hiring needs, and exports provider-verified
+or manually approved contacts for outreach.
 
-## Current Phase
+See [docs/signal-first-apify-roadmap.md](docs/signal-first-apify-roadmap.md).
 
-Phase 1 defines the foundation:
+## Active Track
 
-- Initial ICP
-- Void service taxonomy
-- Prospect types
-- Scoring rules
-- Exclusion criteria
-- Provenance and evidence rules
+The active implementation path is the signal-first Apify roadmap:
 
-See [docs/phase-01-foundation.md](docs/phase-01-foundation.md).
+1. Run commercial validation immediately with a narrow outreach wedge.
+2. Discover companies from sources that produce domains and current trigger
+   evidence.
+3. Detect ATS/job boards and ingest job postings.
+4. Create stale-hiring and related intent signals.
+5. Score prospects with `fit x intent`, including decay and disqualifiers.
+6. Resolve contacts only for qualified companies, through a provider or
+   public-source manual review.
+7. Export a suppression-checked send list and record outreach outcomes.
 
-Phase 2 creates the core system skeleton:
+See [docs/signal-first-apify-roadmap.md](docs/signal-first-apify-roadmap.md).
+Use [docs/outreach-validation-playbook.md](docs/outreach-validation-playbook.md)
+for the parallel Phase 0 campaign workflow.
 
-- FastAPI backend foundation
-- PostgreSQL/Supabase schema migration
-- Environment-based configuration
-- Apify, frontend, and workflow boundaries
+## Dropped Or Deferred
 
-See [docs/phase-02-core-system.md](docs/phase-02-core-system.md).
+The previous YC/accelerator-first, dashboard-first approach is no longer the
+primary build order.
 
-Phase 3 adds the first trusted discovery source:
+Dropped from active MVP scope:
 
-- YC company discovery actor
-- Standardized raw YC source record shape
-- FastAPI ingestion endpoint
-- Idempotent `sources` and `source_records` persistence
+- YC/accelerators as the main market.
+- Broad research on every company.
+- In-house contact discovery across every company.
+- Precision@20 as the main success metric.
 
-See [docs/phase-03-yc-discovery.md](docs/phase-03-yc-discovery.md).
+Deferred until commercial validation proves the wedge:
 
-Phase 4 turns raw source records into canonical identities:
+- LLM intelligence before validation.
+- Generic opportunity inference as the MVP.
+- Dashboard-first delivery.
 
-- Domain/name/location normalization
-- Domain-first company creation
-- Source-record-to-company linking
-- Alias preservation
-- Review state for ambiguous records
+## Retained Foundation
 
-See [docs/phase-04-identity-resolution.md](docs/phase-04-identity-resolution.md).
+The legacy docs still contain useful foundation work, but they are not the
+active execution plan:
 
-Phase 5 enriches contacts only from explicit permitted evidence:
+- [Void Radar Implementation Plan.md](<Void Radar Implementation Plan.md>)
+- [docs/phase-01-foundation.md](docs/phase-01-foundation.md)
+- [docs/phase-02-core-system.md](docs/phase-02-core-system.md)
+- [docs/phase-03-yc-discovery.md](docs/phase-03-yc-discovery.md)
+- [docs/phase-04-identity-resolution.md](docs/phase-04-identity-resolution.md)
+- [docs/phase-05-contact-enrichment.md](docs/phase-05-contact-enrichment.md)
 
-- Manual or provider-supplied contact evidence ingestion
-- Public company website email collection
-- CXO/head/business POC candidate discovery from public pages
-- Entrepreneurs First source ingestion for founder/CXO LinkedIn evidence
-- Contact provenance and duplicate handling
-
-See [docs/phase-05-contact-enrichment.md](docs/phase-05-contact-enrichment.md).
+Retain the reusable pieces: FastAPI, PostgreSQL schema, Apify actor structure,
+domain identity rules, evidence provenance, and contact provenance. YC and EF
+adapters are archived legacy utilities only; they are not active discovery
+sources for the MVP.

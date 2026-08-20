@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "funding-news-discovery",
+  "title": "Funding News Discovery",
+  "description": "Collects public funding/news feed items and emits standardized discovery records for Void Radar.",
+  "version": "0.1.0",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

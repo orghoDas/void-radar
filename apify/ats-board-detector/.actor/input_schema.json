@@ -1,0 +1,68 @@
+{
+  "title": "ATS Board Detector Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "companies": {
+      "title": "Companies",
+      "type": "array",
+      "description": "Resolved company domains to probe.",
+      "editor": "json",
+      "default": [
+        {
+          "company_id": null,
+          "domain": "snout.com"
+        },
+        {
+          "company_id": null,
+          "domain": "marpledata.com"
+        }
+      ]
+    },
+    "maxItems": {
+      "title": "Maximum companies",
+      "type": "integer",
+      "description": "Maximum number of companies to probe from input.",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "requestDelayMs": {
+      "title": "Request delay",
+      "type": "integer",
+      "description": "Delay between company probes in milliseconds.",
+      "default": 250,
+      "minimum": 0,
+      "maximum": 10000
+    },
+    "requestTimeoutMs": {
+      "title": "Request timeout",
+      "type": "integer",
+      "description": "Maximum time to wait for each page request.",
+      "default": 8000,
+      "minimum": 1000,
+      "maximum": 60000
+    },
+    "maxCareersUrls": {
+      "title": "Maximum careers URLs",
+      "type": "integer",
+      "description": "Maximum careers/job candidate URLs to probe per company.",
+      "default": 8,
+      "minimum": 1,
+      "maximum": 20
+    },
+    "includeGenericCareers": {
+      "title": "Include generic careers pages",
+      "type": "boolean",
+      "description": "Emit a generic board detection when no supported ATS provider is found but a careers page exists.",
+      "default": true
+    },
+    "emitMissesToDataset": {
+      "title": "Emit misses to dataset",
+      "type": "boolean",
+      "description": "When true, no-board records are pushed to the dataset with record_type=miss. By default misses are written only to key-value storage.",
+      "default": false
+    }
+  },
+  "required": []
+}

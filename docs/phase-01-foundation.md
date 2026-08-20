@@ -1,9 +1,14 @@
 # Void Radar Phase 1 Foundation
 
+> Status: retained foundation, not the active implementation plan. The active
+> build order is [signal-first-apify-roadmap.md](signal-first-apify-roadmap.md).
+> Use this file for ICP, service taxonomy, provenance, and exclusion references
+> only.
+
 This document defines the first operating assumptions for Void Radar before
-implementation begins. These choices are intentionally narrow so the first YC
-pipeline can be judged by prospect quality before adding more sources,
-automation, contact enrichment, or outreach.
+implementation begins. These choices are intentionally narrow so the first
+trigger-source pipeline can be judged by prospect quality before adding more
+sources, automation, contact enrichment, or outreach.
 
 ## 1. Product Objective
 
@@ -364,7 +369,7 @@ Phase 1 is complete when the repo contains:
 ## 9. Open Decisions for Void
 
 These should be confirmed after early testing or before scaling beyond the first
-YC batch.
+trigger-source batch.
 
 | Decision | Current default | Why it matters |
 |---|---|---|

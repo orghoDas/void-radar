@@ -1,0 +1,280 @@
+{
+  "targets": [
+    {
+      "company_id": "7ea08672-4f49-4a65-ba11-082c288be2b9",
+      "company": "Brain Corp",
+      "domain": "braincorp.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Generic job board detected for braincorp.com.",
+      "evidence_urls": "https://www.braincorp.com/careers;https://news.ycombinator.com/item?id=49160057",
+      "score": 39
+    },
+    {
+      "company_id": "7bea3ecc-ad1d-4a9b-86aa-e52db33b5863",
+      "company": "Distru",
+      "domain": "distru.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Generic job board detected for distru.com.",
+      "evidence_urls": "https://www.distru.com/careers;https://news.ycombinator.com/item?id=49158895",
+      "score": 37
+    },
+    {
+      "company_id": "5bf37f36-2040-4150-aae4-d543c4961c04",
+      "company": "AREO",
+      "domain": "goareo.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "AREO posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49159686",
+      "score": 34
+    },
+    {
+      "company_id": "ec73a9b8-7abd-4983-ab3c-c72147c77a79",
+      "company": "Cogram",
+      "domain": "cogram.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Cogram posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49157888",
+      "score": 34
+    },
+    {
+      "company_id": "ba62184d-134c-422f-999d-4ebf0c02ac92",
+      "company": "Featurebase",
+      "domain": "featurebase.app",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Featurebase posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162401",
+      "score": 34
+    },
+    {
+      "company_id": "4bcc420e-8645-4220-82e1-0f98957a582a",
+      "company": "Flywheel Motion",
+      "domain": "flywheelmotion.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Flywheel Motion ( posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49156702",
+      "score": 34
+    },
+    {
+      "company_id": "00c6f417-c8c3-4743-acc1-d2fb4ad4a31d",
+      "company": "Klara Systems",
+      "domain": "klarasystems.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Klara Systems posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49161851",
+      "score": 34
+    },
+    {
+      "company_id": "cd0a7064-0cda-448e-987d-ac86648524cf",
+      "company": "Kyra Health",
+      "domain": "kyra.health",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Kyra Health posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49156819",
+      "score": 34
+    },
+    {
+      "company_id": "c9cac715-4f3b-4a45-b935-84b6eacce68b",
+      "company": "SentiLink",
+      "domain": "sentilink.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "SentiLink posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162509",
+      "score": 34
+    },
+    {
+      "company_id": "1bcf1171-b46c-4b7c-aa67-05cbdd6c1085",
+      "company": "Senzing",
+      "domain": "senzing.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Senzing posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49156737",
+      "score": 34
+    },
+    {
+      "company_id": "0a97f5f3-d5ba-4111-b6ba-888499f9b312",
+      "company": "Snout",
+      "domain": "snout.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Snout posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49156689",
+      "score": 34
+    },
+    {
+      "company_id": "5bdbe916-8273-4e7e-ae9f-f82065de5e92",
+      "company": "Akkio",
+      "domain": "akkio.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Akkio posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49158703",
+      "score": 23
+    },
+    {
+      "company_id": "41b512d1-6d63-49dc-8732-af5c048f1d07",
+      "company": "Amplify Education",
+      "domain": "amplify.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Amplify Education posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162914",
+      "score": 23
+    },
+    {
+      "company_id": "38d7b2da-06a3-45d4-a47f-af7db36218d7",
+      "company": "App",
+      "domain": "deel.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "App posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49160095",
+      "score": 23
+    },
+    {
+      "company_id": "a2a82d97-04b3-4a4a-a308-106cafa03c28",
+      "company": "Atria",
+      "domain": "atria.org",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Atria posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49160086",
+      "score": 23
+    },
+    {
+      "company_id": "99874b76-4db8-4294-8351-c3d5f3779e61",
+      "company": "AusRehab",
+      "domain": "ausrehab.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "AusRehab posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49164303",
+      "score": 23
+    },
+    {
+      "company_id": "d862ebae-28cf-4b3a-b99f-0352dfcbe2b7",
+      "company": "Better Stack",
+      "domain": "betterstack.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Better Stack posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49159115",
+      "score": 23
+    },
+    {
+      "company_id": "a8b93064-27e6-45ce-8995-4fc59809c98f",
+      "company": "CodeWeavers",
+      "domain": "codeweavers.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "CodeWeavers posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49159312",
+      "score": 23
+    },
+    {
+      "company_id": "285eeb33-9e45-4d1c-97ac-b73ea51e7269",
+      "company": "CoVar",
+      "domain": "covar.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "CoVar posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49160170",
+      "score": 23
+    },
+    {
+      "company_id": "db7e5a9d-5d5a-4a1d-899c-512b989f9c6a",
+      "company": "DualEntry",
+      "domain": "dualentry.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "DualEntry posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49159519",
+      "score": 23
+    },
+    {
+      "company_id": "784a61ef-af8b-4cf7-89b5-319f334d5a60",
+      "company": "Eleos Technologies",
+      "domain": "eleostech.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Eleos Technologies ( posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163576",
+      "score": 23
+    },
+    {
+      "company_id": "702a1c31-4452-4254-9b19-561f674ed519",
+      "company": "Friendly Captcha",
+      "domain": "friendlycaptcha.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Friendly Captcha posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49159002",
+      "score": 23
+    },
+    {
+      "company_id": "9797c69a-6860-49c0-abcc-4d6412042e6b",
+      "company": "FurtherAI",
+      "domain": "furtherai.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "FurtherAI posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162833",
+      "score": 23
+    },
+    {
+      "company_id": "ed3b0033-8ef7-4d6f-84a4-b6617a1e333a",
+      "company": "GetEpic.com",
+      "domain": "getepic.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "GetEpic.com posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49161868",
+      "score": 23
+    },
+    {
+      "company_id": "a119c746-3f22-44c0-9b76-0c9d2d3a5b77",
+      "company": "Hatchet Jobs",
+      "domain": "hatchet-jobs.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Hatchet Jobs posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49310192",
+      "score": 23
+    },
+    {
+      "company_id": "61fa7b60-e83e-4ea3-9018-4ead448be532",
+      "company": "Kinelo",
+      "domain": "kinelo.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Kinelo posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162608",
+      "score": 23
+    },
+    {
+      "company_id": "7ad61ddf-c1a6-4aea-b702-fad3c3dc5ac8",
+      "company": "Legion Intelligence",
+      "domain": "legionintel.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Legion Intelligence posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49158982",
+      "score": 23
+    },
+    {
+      "company_id": "e07ebeaa-642f-4747-9e38-24d0da955e7b",
+      "company": "Marple",
+      "domain": "marpledata.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Marple posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49157080",
+      "score": 23
+    },
+    {
+      "company_id": "2df84955-47ff-4a77-b574-55146d15794b",
+      "company": "Octozi",
+      "domain": "octozi.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Octozi posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162990",
+      "score": 23
+    },
+    {
+      "company_id": "71c757a1-3897-461c-beda-85ff3099d1fe",
+      "company": "pganalyze",
+      "domain": "pganalyze.com",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "pganalyze posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163658",
+      "score": 23
+    }
+  ],
+  "maxItems": 30,
+  "maxPagesPerCompany": 12,
+  "requestDelayMs": 500,
+  "includeGenericEmails": false,
+  "includeExternalEmails": false,
+  "emitMissesToDataset": true
+}

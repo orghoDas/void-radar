@@ -1,0 +1,190 @@
+{
+  "targets": [
+    {
+      "company_id": "271bac56-4b79-419c-802f-d6a32268dabd",
+      "company": "Enveritas",
+      "domain": "enveritas.org",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Enveritas posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49158655",
+      "score": 34
+    },
+    {
+      "company_id": "3c0d1feb-0bce-4227-951d-be60f87d783e",
+      "company": "Klutch AI (",
+      "domain": "klutch.ai",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Klutch AI ( posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49159064",
+      "score": 34
+    },
+    {
+      "company_id": "3c9e6b93-db5e-4cc0-bafe-04675ba7da74",
+      "company": "Storepass",
+      "domain": "storepass.co",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Storepass posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163131",
+      "score": 34
+    },
+    {
+      "company_id": "39358f97-7f35-4a58-9126-3f64ae24df97",
+      "company": "Tasklet",
+      "domain": "tasklet.ai",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Tasklet posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49159942",
+      "score": 34
+    },
+    {
+      "company_id": "1744bde2-4cc6-4c5c-aff6-f2a4aad7dbeb",
+      "company": "Aeolus",
+      "domain": "aeolus.earth",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Aeolus posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49158131",
+      "score": 23
+    },
+    {
+      "company_id": "a60bc4f3-d090-40d3-8342-190fe766ef5c",
+      "company": "BASE16",
+      "domain": "base16.fr",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "BASE16 posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162696",
+      "score": 23
+    },
+    {
+      "company_id": "cbe2cfb6-928b-4ea7-9c87-6320418fecaf",
+      "company": "Bucket Robotics",
+      "domain": "bucket.bot",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Bucket Robotics posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162501",
+      "score": 23
+    },
+    {
+      "company_id": "22dc0f18-6de9-4351-8b83-5c3f06a03286",
+      "company": "Chainguard",
+      "domain": "chainguard.dev",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Chainguard posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49164297",
+      "score": 23
+    },
+    {
+      "company_id": "32b5e078-f12c-4bba-bdfc-4728e79ecc5f",
+      "company": "Cockpit",
+      "domain": "cockpit.at",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Cockpit posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49157970",
+      "score": 23
+    },
+    {
+      "company_id": "c2d93351-28dc-4a87-a5f7-f51917b129f2",
+      "company": "Detections.ai",
+      "domain": "detections.ai",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Detections.ai posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163907",
+      "score": 23
+    },
+    {
+      "company_id": "917b44da-3d41-4989-adfd-488b47bfe21f",
+      "company": "Diffusion",
+      "domain": "diffusion.io",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Diffusion posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49160628",
+      "score": 23
+    },
+    {
+      "company_id": "a71ca9f9-6c27-4518-8be9-6f77b7ea056f",
+      "company": "Domino Data Lab",
+      "domain": "domino.ai",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Domino Data Lab posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162776",
+      "score": 23
+    },
+    {
+      "company_id": "0b432b98-67f5-4d00-90b4-9844806c57e2",
+      "company": "exe.dev",
+      "domain": "exe.dev",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "exe.dev posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163107",
+      "score": 23
+    },
+    {
+      "company_id": "6ec763cc-1e87-4433-85ee-0fa0e62f66ab",
+      "company": "Foxglove",
+      "domain": "foxglove.dev",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Foxglove posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163678",
+      "score": 23
+    },
+    {
+      "company_id": "f7a81e8d-180f-49f3-857c-52fb586547fb",
+      "company": "Harmony AI",
+      "domain": "tryharmony.ai",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Harmony AI posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163301",
+      "score": 23
+    },
+    {
+      "company_id": "ae9e22cf-e4fe-4140-95cd-2dd0ae567bcd",
+      "company": "Hatchet",
+      "domain": "hatchet.run",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Hatchet posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49162047",
+      "score": 23
+    },
+    {
+      "company_id": "40732e5a-a33f-4bcd-b5d7-4b7ea1b01dc9",
+      "company": "Open Education Applications / Neon",
+      "domain": "openeducation.foundation",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Open Education Applications / Neon posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49156711",
+      "score": 23
+    },
+    {
+      "company_id": "bdb8db85-3757-499c-a2a2-ef085ffe8b3e",
+      "company": "Performance",
+      "domain": "performance.fyi",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Performance posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49164538",
+      "score": 23
+    },
+    {
+      "company_id": "f7629e25-0a28-4d9d-8703-e4db848720e9",
+      "company": "Phaselaw",
+      "domain": "phase.law",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "Phaselaw posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49163946",
+      "score": 23
+    },
+    {
+      "company_id": "523024dc-68a2-4a52-a7c5-e981f3fc8dc5",
+      "company": "PlantingSpace",
+      "domain": "planting.space",
+      "target_roles": "CTO; Founder; Head of Talent; VP Engineering",
+      "reason_to_write": "PlantingSpace posted in Ask HN: Who is hiring? (August 2026).",
+      "evidence_urls": "https://news.ycombinator.com/item?id=49157674",
+      "score": 23
+    }
+  ],
+  "maxItems": 20,
+  "maxPagesPerCompany": 12,
+  "requestDelayMs": 500,
+  "includeGenericEmails": false,
+  "includeExternalEmails": false,
+  "emitMissesToDataset": true
+}

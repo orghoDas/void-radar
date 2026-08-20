@@ -1,5 +1,9 @@
 # Void Radar Phase 5 Contact Enrichment
 
+> Status: legacy/deferred scope. Contacts should now be resolved and verified
+> only after a company passes signal and scoring gates. The active build order
+> is [signal-first-apify-roadmap.md](signal-first-apify-roadmap.md).
+
 Phase 5 turns verified founder/contact evidence into outreach-ready contact
 records.
 
@@ -152,7 +156,8 @@ Example `contacts.json`:
 }
 ```
 
-Compare additional accelerator portfolio sources against the local YC baseline:
+Legacy only: compare additional accelerator portfolio sources against the old
+local YC baseline:
 
 ```bash
 DATABASE_URL='postgresql+psycopg:///void_radar?host=/tmp' \
@@ -167,7 +172,7 @@ The source probe is read-only. It measures visible company, website, founder or
 decision-maker, LinkedIn, and email coverage before creating a dedicated actor
 or ingestion path.
 
-Ingest Entrepreneurs First portfolio records:
+Legacy only: ingest Entrepreneurs First portfolio records:
 
 ```bash
 backend/.venv/bin/python scripts/ingest_entrepreneur_first_dataset.py \
@@ -182,19 +187,18 @@ backend/.venv/bin/python scripts/ingest_entrepreneur_first_dataset.py \
   /private/tmp/ef-portfolio.html
 ```
 
-Process stored Entrepreneurs First source records into companies, founders, and
-founder profiles:
+Legacy only: process stored Entrepreneurs First source records into companies,
+founders, and founder profiles:
 
 ```bash
 DATABASE_URL='postgresql+psycopg:///void_radar?host=/tmp' \
   backend/.venv/bin/python scripts/process_entrepreneur_first_source_records.py
 ```
 
-Entrepreneurs First currently provides strong founder/CXO names and LinkedIn
-URLs, but does not consistently expose official company websites on the public
-portfolio listing. Its processor can create name-only candidate companies so
-the founder evidence is usable immediately; official domains should be filled
-by later website/profile enrichment.
+Entrepreneurs First is no longer an active MVP source. It can provide
+founder/CXO names and LinkedIn URLs, but it does not consistently expose current
+buying-trigger evidence or official company domains, so keep this workflow
+archived unless the source thesis changes.
 
 ## Acceptance Criteria
 

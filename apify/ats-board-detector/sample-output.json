@@ -1,0 +1,17 @@
+[
+  {
+    "company_id": "uuid-or-null",
+    "domain": "example.com",
+    "ats_provider": "greenhouse",
+    "board_token": "example",
+    "board_url": "https://boards.greenhouse.io/example",
+    "careers_url": "https://example.com/careers",
+    "confidence": 0.92,
+    "evidence_url": "https://example.com/careers",
+    "raw_evidence": {
+      "collector": "ats-board-detector",
+      "detection_method": "careers_link",
+      "checked_urls": ["https://example.com", "https://example.com/careers"]
+    }
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "title": "HN Who Is Hiring Discovery Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "maxItems": {
+      "title": "Maximum records",
+      "type": "integer",
+      "description": "Maximum number of standardized company records to output.",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "threadId": {
+      "title": "HN thread ID",
+      "type": "string",
+      "description": "Optional specific Who is Hiring story ID. If omitted, the actor searches Algolia for the latest thread.",
+      "editor": "textfield"
+    },
+    "query": {
+      "title": "Thread search query",
+      "type": "string",
+      "description": "Algolia search query used when threadId is omitted.",
+      "default": "Ask HN: Who is hiring?"
+    },
+    "minCommentLength": {
+      "title": "Minimum comment length",
+      "type": "integer",
+      "description": "Skip very short comments.",
+      "default": 80,
+      "minimum": 0,
+      "maximum": 1000
+    }
+  },
+  "required": []
+}

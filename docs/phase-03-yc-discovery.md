@@ -1,6 +1,11 @@
 # Void Radar Phase 3 YC Discovery
 
-Phase 3 builds the first trusted discovery source:
+> Status: archived legacy source adapter. YC is not an active MVP discovery
+> source. Do not use this phase to drive lead generation unless the product
+> direction explicitly changes. The active path is
+> [signal-first-apify-roadmap.md](signal-first-apify-roadmap.md).
+
+This historical phase built the first discovery adapter:
 
 ```text
 Y Combinator
@@ -10,9 +15,10 @@ Y Combinator
   -> sources + source_records
 ```
 
-This phase is intentionally discovery-only. It preserves raw source records and
-provenance, but does not normalize companies, create canonical company records,
-resolve domains, call AI, score prospects, or build dashboard views.
+This phase is intentionally discovery-only and retained for reference. It
+preserves raw source records and provenance, but does not normalize companies,
+create canonical company records, resolve domains, call AI, score prospects, or
+build dashboard views.
 
 ## Source Access
 
@@ -32,7 +38,7 @@ https://yc-oss.github.io/api/companies/all.json
 The actor still treats YC as the underlying trusted source by preserving YC
 company URLs and source company identifiers in every record.
 
-Before production scheduling, review the active source terms and rate limits.
+Do not production-schedule this actor for the current MVP.
 
 ## Actor
 

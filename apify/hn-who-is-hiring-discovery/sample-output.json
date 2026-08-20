@@ -1,0 +1,21 @@
+[
+  {
+    "source": "hacker_news_who_is_hiring",
+    "source_url": "https://news.ycombinator.com/item?id=123",
+    "source_record_id": "123",
+    "company_name": "Example AI",
+    "website": "https://example.ai",
+    "domain": "example.ai",
+    "location": "Remote",
+    "industry": null,
+    "stage": null,
+    "status": "active",
+    "employee_count": null,
+    "description": "Example AI | Remote | Backend Engineer | https://example.ai",
+    "tags": ["hiring", "hacker_news"],
+    "event_type": "hiring",
+    "event_date": "2026-08-20",
+    "event_summary": "Example AI posted in HN Who is Hiring.",
+    "raw_source_payload": {}
+  }
+]
