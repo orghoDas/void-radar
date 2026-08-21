@@ -26,6 +26,40 @@ TARGET_INDUSTRY_TERMS = (
     "insurtech",
     "commerce",
     "productivity",
+    # Non-technical sectors that buy software but rarely build it. These are
+    # the revised target: the qualifier is absence of engineering capacity,
+    # not company size.
+    "manufacturing",
+    "distribution",
+    "wholesale",
+    "healthcare",
+    "education",
+    "university",
+    "college",
+    "housing",
+    "construction",
+    "engineering services",
+    "professional services",
+    "accounting",
+    "legal services",
+    "local government",
+    "council",
+    "public sector",
+    "utilities",
+    "energy",
+    "water",
+    "transport",
+    "rail",
+    "haulage",
+    "freight",
+    "warehousing",
+    "facilities",
+    "hospitality",
+    "retail",
+    "agriculture",
+    "charity",
+    "housing association",
+    "nhs",
 )
 
 COMPETITOR_TERMS = (
@@ -147,6 +181,22 @@ def score_company(
 
 
 
+def github_small_footprint_signal(db: Session, company_id: str) -> bool:
+    """Confirmed absence of a public engineering org is positive evidence."""
+    row = db.execute(
+        text(
+            """
+            select 1 from signals
+            where company_id = :company_id
+              and signal_type = 'GITHUB_ORG_SMALL_FOOTPRINT'
+            limit 1
+            """
+        ),
+        {"company_id": company_id},
+    ).first()
+    return row is not None
+
+
 def github_engineering_org_signal(db: Session, company_id: str) -> str | None:
     """Ground truth beats inference: a large active public org will not outsource."""
     row = db.execute(
@@ -215,10 +265,11 @@ def calculate_fit_score(
             score += 12
             context.positive_reasons.append("Company size fits serviceable SMB/mid-market.")
         elif employee_count > 500:
-            score -= 28
+            # Not disqualifying on its own. The GitHub check below decides
+            # whether they actually have engineering capacity.
+            score -= 6
             context.add_penalty(
-                "Large company likely has substantial internal engineering.",
-                disqualifying=True,
+                "Large company; verify engineering capacity before outreach."
             )
         elif employee_count < 5:
             score -= 8
@@ -243,6 +294,11 @@ def calculate_fit_score(
         context.add_penalty(
             f"GitHub shows substantial in-house engineering: {github_org}",
             disqualifying=True,
+        )
+    elif github_small_footprint_signal(db, company["id"]):
+        score += 14
+        context.positive_reasons.append(
+            "GitHub shows no substantial in-house engineering footprint."
         )
 
     if matched_terms(company_text, COMPETITOR_TERMS):

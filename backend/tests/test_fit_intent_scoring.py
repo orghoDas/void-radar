@@ -384,3 +384,34 @@ def seed_companies(connection) -> None:
             """
         )
     )
+
+
+def test_large_company_without_engineering_org_is_not_disqualified() -> None:
+    """Revised thesis: size is not the disqualifier, in-house engineering is.
+
+    A large logistics firm with no developers is the target buyer, not a
+    company to exclude.
+    """
+    client, db = make_client()
+
+    db.execute(
+        text(
+            """
+            insert into companies (
+                id, canonical_name, canonical_domain, industry,
+                employee_estimate, created_at, updated_at
+            ) values (
+                'company-large-nontech', 'Large Haulage Co', 'haulage-co.com',
+                'logistics and distribution', 2000,
+                current_timestamp, current_timestamp
+            )
+            """
+        )
+    )
+    db.commit()
+
+    response = client.post("/scoring/companies/company-large-nontech", json={})
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["disqualified"] is False

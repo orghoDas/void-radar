@@ -86,6 +86,9 @@ function standardizeRelease(release, cpvPrefixes, skipped) {
   const parties = release.parties ?? [];
   const buyerName = release.buyer?.name ?? parties[0]?.name ?? null;
   const domain = buyerDomain(parties, skipped);
+  // The notice names who to contact about this specific tender. That is public
+  // record and the strongest contact provenance available, so keep it.
+  const contact = buyerContact(parties, domain);
   if (!buyerName || !domain) {
     skipped.no_domain += 1;
     return null;
@@ -112,6 +115,10 @@ function standardizeRelease(release, cpvPrefixes, skipped) {
       deadline ? `Deadline ${deadline.slice(0, 10)}` : null,
     ].filter(Boolean).join(' | '),
     description: (tender.description ?? '').slice(0, 2000) || null,
+    contact_name: contact.name,
+    contact_email: contact.email,
+    contact_phone: contact.phone,
+    contact_is_portal: contact.isPortal,
     raw_source_payload: {
       collector: 'procurement-discovery',
       ocid: release.ocid ?? null,
@@ -146,6 +153,25 @@ function buyerDomain(parties, skipped) {
     return host;
   }
   return null;
+}
+
+function buyerContact(parties, domain) {
+  let fallback = { name: null, email: null, phone: null, isPortal: false };
+  for (const party of parties) {
+    const point = party?.contactPoint;
+    if (!point?.email) continue;
+    const host = String(point.email).split('@')[1]?.toLowerCase();
+    const entry = {
+      name: point.name ?? null,
+      email: String(point.email).toLowerCase(),
+      phone: point.telephone ?? null,
+      isPortal: isPortal(host ?? ''),
+    };
+    // An address on the buyer's own domain is the one worth having.
+    if (host && domain && host.replace(/^www\./, '') === domain) return entry;
+    if (!entry.isPortal && !fallback.email) fallback = entry;
+  }
+  return fallback;
 }
 
 function isPortal(host) {
