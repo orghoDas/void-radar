@@ -1,0 +1,65 @@
+company,domain,engineering_presence,max_age_days,stale_roles,oldest_role,score,public_repos,evidence_url
+E2B,e2b.dev,no_substantial_in_house_engineering,388,3,DevRel Engineer,85,0,https://jobs.ashbyhq.com/e2b/7dcdd500-b22f-4b81-9014-a8b2a7e0f56d
+Canopy,canopyworks.com,no_substantial_in_house_engineering,146,4,Senior Software Engineer - NYC metro,85,0,https://job-boards.greenhouse.io/canopyworks/jobs/4185888009
+Axle Health,axlehealth.com,no_substantial_in_house_engineering,126,3,"Senior Software Engineer, Backend",85,0,https://jobs.ashbyhq.com/axle-health/8db08b55-399c-4e95-ac96-b2726933729c
+Authorium,authorium.com,no_substantial_in_house_engineering,91,2,Software Engineer,85,0,https://jobs.ashbyhq.com/authorium/b59ff28c-3e3c-4190-abaa-ab8572052740
+Parabola,parabola.io,no_substantial_in_house_engineering,296,2,"Senior Software Engineer, Full Stack",82,0,https://jobs.ashbyhq.com/parabola-io/487aa834-883f-4c65-8919-617f1a5b582e
+Findigs,findigs.com,no_substantial_in_house_engineering,470,2,Senior Software Engineer,61,1,https://jobs.lever.co/findigs/3b39616d-223f-4326-a500-f804c3e18dcf
+Krea,krea.ai,no_substantial_in_house_engineering,385,3,Machine Learning Engineer,61,2,https://jobs.ashbyhq.com/krea/06a135f6-fb4c-446c-ac99-be1af655b964
+CoVar,covar.com,no_substantial_in_house_engineering,346,3,Signal Processing Engineer,61,0,https://job-boards.greenhouse.io/covar/jobs/4865336007
+Starbridge,starbridge.ai,no_substantial_in_house_engineering,303,1,AI Engineer | NYC,61,0,https://jobs.ashbyhq.com/starbridge/117e56db-e1b7-4f83-bc18-44af88efa04e
+9 Mothers YC P26,9mothers.com,no_substantial_in_house_engineering,206,5,"Robotics Engineer, Senior",61,2,https://jobs.ashbyhq.com/9-mothers/4371c968-1ddf-450a-bfad-41b43ed8c302
+TypeSafe AI,typesafe.ai,no_substantial_in_house_engineering,198,2,Developer Advocate,61,0,https://jobs.ashbyhq.com/typesafe-ai/4537eb37-94a3-43d6-9760-6f41c125aba4
+Evertune AI,evertune.ai,no_substantial_in_house_engineering,175,4,"Senior Software Engineer, Back End & Infrastructure",61,0,https://jobs.ashbyhq.com/evertune/c46e5b7b-e947-4df2-8944-ae3d4c40f32c
+Electric Twin,electrictwin.com,no_substantial_in_house_engineering,163,4,Software Engineer (Mid / Senior / Staff / Principal),61,0,https://jobs.lever.co/electric-twin/be47f76c-0b82-4f22-bd9a-4d335ef51564
+Nango,nango.dev,no_substantial_in_house_engineering,149,1,Founding Developer Relations,61,0,https://jobs.ashbyhq.com/nango/95526e19-b9c4-468f-b420-41348f1688ae
+Anterior,anterior.com,no_substantial_in_house_engineering,134,2,Senior Member of Technical Staff,61,0,https://jobs.ashbyhq.com/anterior/1163af7a-d1d6-41db-a8ea-fc49fd97c6b0
+Hive (,hive.co,no_substantial_in_house_engineering,114,1,Senior Software Developer,61,0,https://jobs.ashbyhq.com/hive.co/19c52872-49b4-4095-b0d6-e751485ffcb7
+August Health (,augusthealth.com,no_substantial_in_house_engineering,106,1,Senior Full Stack Engineer,61,3,https://jobs.ashbyhq.com/august-health/f575edd6-5a99-49dd-9504-fb25b810919e
+FurtherAI,furtherai.com,no_substantial_in_house_engineering,100,1,Forward Deployed Engineer,61,0,https://jobs.ashbyhq.com/furtherai/d2fb3438-c7ca-469a-81c7-d98cea49b0d2
+Falconer,falconer.com,no_substantial_in_house_engineering,493,3,Founding AI Engineer,58,0,https://jobs.ashbyhq.com/falconer/75083e64-e5fb-4cb6-ba81-9a548b30e317
+Steel.dev,steel.dev,no_substantial_in_house_engineering,146,1,Member of Technical Staff - Agents,55,0,https://jobs.ashbyhq.com/steel/c5a1ec46-5507-4c5b-9fed-f15ce25fd7be
+Kinelo,kinelo.com,no_substantial_in_house_engineering,141,1,Senior/ Staff Software Engineer,52,0,https://job-boards.greenhouse.io/kinelo/jobs/4205846009
+Temporal Technologies,temporal.io,no_substantial_in_house_engineering,966,16,"Staff Software Engineer, Open Source Server",16,0,https://job-boards.greenhouse.io/temporaltechnologies/jobs/4163457007
+Column (,column.com,no_substantial_in_house_engineering,549,1,Software Engineer,16,5,https://jobs.ashbyhq.com/column/8ad3cf7b-7ea3-47f6-86c4-c83a9d78ff50
+Fluidstack,anthropic.com,no_substantial_in_house_engineering,507,23,"[Expression of Interest] Research Engineer / Scientist, Alignment - London",16,0,https://job-boards.greenhouse.io/anthropic/jobs/4610158008
+Middesk,middesk.comat,no_substantial_in_house_engineering,456,5,Software Engineer,16,8,https://jobs.ashbyhq.com/middesk/e1c6af86-dce1-495f-a710-ad369fd1308c
+Shepherd,shepherdinsurance.com,no_substantial_in_house_engineering,423,6,"Software Engineer, Backend",16,0,https://jobs.ashbyhq.com/shepherd/395f4b75-cf05-4581-8408-8f4fe0f1480b
+fal,fal.ai,no_substantial_in_house_engineering,395,12,"Software Engineer, Distributed Systems",16,0,https://jobs.ashbyhq.com/fal-ai/8c913444-c1f4-4eca-a517-5c3fa434f68c
+Rad AI Multiple roles,radai.com,no_substantial_in_house_engineering,308,4,Staff ML Research Scientist,16,0,https://jobs.ashbyhq.com/radai/4d53316c-6138-459b-8b51-6800ae5b336d
+Oscilar.com,oscilar.com,no_substantial_in_house_engineering,297,9,Sr./Staff JavaScript Developer - Web SDK,16,4,https://jobs.ashbyhq.com/oscilar/f2f3fd3e-bf15-485d-ad64-81a31bc11279
+Legion Intelligence,legionintel.com,no_substantial_in_house_engineering,188,1,Staff Applied Machine Learning Engineer,16,0,https://job-boards.greenhouse.io/yurtsai/jobs/5053001007
+PermitFlow,permitflow.com,no_substantial_in_house_engineering,180,7,Software Engineer,16,2,https://jobs.ashbyhq.com/permitflow/8d780d11-57e8-4570-a599-b8dc3d4377a1
+Callosum,callosum.com,no_substantial_in_house_engineering,176,2,Expression of Interest - Intelligent Systems Engineer,16,0,https://jobs.ashbyhq.com/callosum/49df3034-21c5-47da-b63f-22bf1ab7b893
+Phonely,phonely.ai,no_substantial_in_house_engineering,134,5,DevOps Engineer,16,0,https://jobs.ashbyhq.com/phonely/ca01bf39-b303-4f3d-a32a-b17fc4df7459
+Simple Ventures,simpleventures.ca,no_substantial_in_house_engineering,783,3,CEO,10,0,https://jobs.lever.co/simpleventures/6f272f9b-e25a-4b74-bea5-c0751db3306d
+Viam,viam.com,unknown_not_checked,1637,2,Interested in Future Viam Roles*,61,0,https://job-boards.greenhouse.io/viamrobotics/jobs/4366983004
+Sourcegraph,sourcegraph.com,unknown_not_checked,1472,1,Join our Talent Community to learn about future job opportunities!,61,0,https://job-boards.greenhouse.io/sourcegraph91/jobs/4621149004
+Close,close.com,unknown_not_checked,587,3,Senior Software Engineer – Backend (USA Only - 100% Remote),61,0,https://jobs.ashbyhq.com/close/01fc4ad7-4d33-4f64-919f-502bb2c20efc
+Neon Health,neonhealth.com,unknown_not_checked,395,6,Senior Backend Engineer,61,0,https://jobs.ashbyhq.com/neon-health/892d93e5-20f9-4633-8e5e-a34e9af716f4
+Chestnut,chestnutfi.com,unknown_not_checked,386,4,Software Engineer (Staff-Level),61,0,https://jobs.ashbyhq.com/chestnut/f28c5ee5-12aa-4e7b-b0ea-f593c0b855a8
+Kepler,kepler.ai,unknown_not_checked,331,4,Backend Software Engineer,61,0,https://jobs.ashbyhq.com/kepler-ai/77877cbb-d762-4a4a-8c05-8f03f019b687
+Rangeview (,rangeview.com,unknown_not_checked,291,3,Production/Advanced Manufacturing Engineer,61,0,https://job-boards.greenhouse.io/rangeviewinc/jobs/4054565009
+Trace Labs,tracelabs.ai,unknown_not_checked,210,1,"Software Engineer, Full Stack",61,0,https://jobs.ashbyhq.com/tracelabs/963005ce-f4f1-4d54-957d-139b7849cb4a
+Speakeasy,speakeasy.com,unknown_not_checked,168,1,Forward Deployed Engineer,61,0,https://jobs.ashbyhq.com/speakeasy/def210b2-b6aa-421b-84c4-dcd278f95db9
+Tabula Bio,tabulabio.com,unknown_not_checked,150,1,Founding Machine Learning Scientist,55,0,https://jobs.ashbyhq.com/tabulabio/bac24553-b901-4271-85c1-d846c4f0f17c
+Runway,runwayml.com,unknown_not_checked,1574,9,"Member of Technical Staff, Backend Engineer, API",16,0,https://jobs.ashbyhq.com/runway-ml/8489a08a-f0cf-4418-968c-c7c803d538bc
+Tandem Health,tandemhealth.ai,unknown_not_checked,618,8,AI Engineer,16,0,https://jobs.ashbyhq.com/tandem-health/583fef4f-4417-40d9-a87e-e405180f71ce
+Reddit,reddit.com,unknown_not_checked,590,38,"Software Engineer, Ads",16,0,https://job-boards.greenhouse.io/reddit/jobs/6512458
+Colonist,colonist.io,unknown_not_checked,294,5,Product Engineer,16,0,https://jobs.ashbyhq.com/colonist/109d62c4-52f3-4980-9c49-d31773818736
+Antithesis,antithesis.com,unknown_not_checked,229,6,Engineering Manager,16,0,https://jobs.ashbyhq.com/antithesis/13e8c0b4-5c7d-4360-af13-9bee0c2e3817
+SentiLink,sentilink.com,unknown_not_checked,226,9,Staff Infrastructure Engineer,16,0,https://jobs.ashbyhq.com/sentilink/95231d9a-0567-44a8-ac1f-8f9dd12bac79
+DualEntry,dualentry.com,unknown_not_checked,195,6,Senior/Staff Product Designer,16,0,https://jobs.ashbyhq.com/dualentry/11a25d32-42d9-4f39-b8e9-013852e2860c
+Radical Numerics,radicalnumerics.ai,unknown_not_checked,154,1,Head of Data Acquisition,16,0,https://jobs.ashbyhq.com/radical-numerics/5ff66f07-d655-4e86-8600-0647705c99d5
+CLEAR,clearme.com,unknown_not_checked,128,5,"Lead Product Manager, Identity & Evidence Verification",16,0,https://job-boards.greenhouse.io/clear/jobs/7809586
+*Scribd,scribd.com,unknown_not_checked,114,2,Staff Software Engineer (Backend) - Fable Core,16,0,https://jobs.ashbyhq.com/scribdinc/450391bf-4fb2-4fae-9acd-96851c7e82e3
+Scribd,scribdinc.com,unknown_not_checked,114,2,Staff Software Engineer (Backend) - Fable Core,16,0,https://jobs.ashbyhq.com/scribdinc/450391bf-4fb2-4fae-9acd-96851c7e82e3
+Atom Computing,atom-computing.com,unknown_not_checked,108,2,Senior Software Engineer - Control Systems,16,0,https://jobs.lever.co/atomcomputing/34f2f0d8-c8ea-4795-bd0b-143abd13b747
+Kraken Tech,kraken.tech,unknown_not_checked,104,1,Mid level Software Engineer (Java/AWS),16,0,https://jobs.ashbyhq.com/krakentech/4905e964-0a0d-4ba0-a5ec-0a363e967d79
+Coder,coder.com,has_in_house_engineering,91,1,Software Engineer (AI Governance),13,237,https://jobs.ashbyhq.com/coder/b192214f-59e0-4fda-9b94-3a29b6fed9ff
+PlanetScale,planetscale.com,has_in_house_engineering,392,7,Software Engineer - PlanetScale Vitess,12,155,https://job-boards.greenhouse.io/planetscale/jobs/4009746009
+Nylas,nylas.com,has_in_house_engineering,143,3,Product Marketing Manager,12,87,https://jobs.ashbyhq.com/nylas/2acb49b8-4e50-4829-830f-dfe773726d57
+LiveKit,livekit.io,has_in_house_engineering,428,4,Staff Security Engineer,2,109,https://jobs.ashbyhq.com/livekit/efc06ff8-37c4-473e-8de8-bbba56cf0479
+Grafana Labs,grafana.com,has_in_house_engineering,252,9,Staff Software Engineer (Internal Tooling) | United States | Remote,2,590,https://job-boards.greenhouse.io/grafanalabs/jobs/5735539004
+Deepl,deepl.com,has_in_house_engineering,176,1,Product GTM Specialist | DeepL Voice,2,35,https://jobs.ashbyhq.com/deepl/d76e8fbf-19f4-495b-9e2a-55b7a7ef3fa6
+Langfuse,langfuse.com,has_in_house_engineering,184,3,Senior Product Engineer,0,25,https://jobs.ashbyhq.com/langfuse/a2c4e24c-21d1-4a9f-8d46-422d0592efd6

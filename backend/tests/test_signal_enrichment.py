@@ -532,3 +532,29 @@ def test_non_technical_role_does_not_create_stale_engineering_signal() -> None:
     assert "STALE_ENGINEERING_ROLE" not in signal_types
     assert "TECH_STACK_NEED" not in signal_types
     assert "OPERATIONS_SOFTWARE_NEED" not in signal_types
+
+
+def test_non_technical_title_filed_under_engineering_is_vetoed() -> None:
+    """Companies mislabel departments, so the title has to carry the veto."""
+    client, db = make_client()
+
+    response = client.post(
+        "/enrichment/job-postings",
+        json={
+            "records": [
+                {
+                    "domain": "example.ai",
+                    "ats_provider": "greenhouse",
+                    "external_job_id": "job-ae",
+                    "title": "Account Executive, Enterprise",
+                    "department": "Engineering",
+                    "posted_at": "2020-01-01T00:00:00Z",
+                    "url": "https://boards.greenhouse.io/example-ai/jobs/ae-1",
+                    "description_text": "Sell our platform to enterprise engineering teams.",
+                }
+            ]
+        },
+    )
+
+    assert response.status_code == 201
+    assert response.json()["signals_created"] == 0

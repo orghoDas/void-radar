@@ -1,0 +1,32 @@
+{
+  "title": "Procurement Discovery Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "maxItems": {
+      "title": "Maximum records",
+      "type": "integer",
+      "description": "Maximum discovery records to emit.",
+      "default": 100, "minimum": 1, "maximum": 500
+    },
+    "pages": {
+      "title": "Search pages",
+      "type": "integer",
+      "description": "How many pages of tender notices to scan.",
+      "default": 5, "minimum": 1, "maximum": 50
+    },
+    "cpvPrefixes": {
+      "title": "CPV classification prefixes",
+      "type": "array",
+      "description": "Common Procurement Vocabulary prefixes to keep. 72 is IT services, 48 is software packages.",
+      "editor": "json",
+      "default": ["72", "48"]
+    },
+    "requestDelayMs": {
+      "title": "Request delay",
+      "type": "integer",
+      "default": 600, "minimum": 0, "maximum": 10000
+    }
+  },
+  "required": []
+}

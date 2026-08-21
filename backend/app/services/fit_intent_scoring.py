@@ -41,6 +41,9 @@ CRYPTO_TERMS = ("crypto", "web3", "blockchain", "nft", "defi")
 FREE_MAIL_DOMAINS = {"gmail.com", "yahoo.com", "hotmail.com", "outlook.com"}
 
 SIGNAL_INTENT_WEIGHTS = {
+    # A published tender states a budget and a deadline outright, which is a
+    # stronger intent claim than an inferred one.
+    "PROCUREMENT_NOTICE": 90,
     "STALE_ENGINEERING_ROLE": 85,
     "AGING_ENGINEERING_ROLE": 68,
     "HIRING_SPIKE": 78,
@@ -143,6 +146,22 @@ def score_company(
     )
 
 
+
+def github_engineering_org_signal(db: Session, company_id: str) -> str | None:
+    """Ground truth beats inference: a large active public org will not outsource."""
+    row = db.execute(
+        text(
+            """
+            select description from signals
+            where company_id = :company_id
+              and signal_type = 'GITHUB_ENGINEERING_ORG_DETECTED'
+            order by detected_at desc limit 1
+            """
+        ),
+        {"company_id": company_id},
+    ).first()
+    return str(row[0]) if row else None
+
 def calculate_fit_score(
     db: Session,
     company: dict,
@@ -215,6 +234,14 @@ def calculate_fit_score(
         score -= 22
         context.add_penalty(
             "Large active engineering hiring footprint may indicate strong in-house team.",
+            disqualifying=True,
+        )
+
+    github_org = github_engineering_org_signal(db, company["id"])
+    if github_org:
+        score -= 35
+        context.add_penalty(
+            f"GitHub shows substantial in-house engineering: {github_org}",
             disqualifying=True,
         )
 

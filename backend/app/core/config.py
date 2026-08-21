@@ -25,6 +25,15 @@ class Settings(BaseSettings):
 
     apify_token: str | None = Field(default=None, alias="APIFY_TOKEN")
     openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
+    openrouter_api_key: str | None = Field(default=None, alias="OPENROUTER_API_KEY")
+    openrouter_base_url: str = Field(
+        default="https://openrouter.ai/api/v1",
+        alias="OPENROUTER_BASE_URL",
+    )
+    openrouter_model: str = Field(
+        default="anthropic/claude-sonnet-4.5",
+        alias="OPENROUTER_MODEL",
+    )
     supabase_url: str | None = Field(default=None, alias="SUPABASE_URL")
     supabase_service_role_key: str | None = Field(
         default=None,

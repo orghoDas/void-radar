@@ -64,7 +64,28 @@ await Actor.main(async () => {
   let jobsOutput = 0;
 
   for (const board of boards.slice(0, maxBoards)) {
-    const jobs = await fetchJobsForBoard(board, { includeGenericHtml, requestTimeoutMs });
+    // A board can 404 or time out (a stale Lever slug, a careers page that moved).
+    // That is per-board evidence, not a reason to abandon the remaining batch.
+    let jobs = [];
+    try {
+      jobs = await fetchJobsForBoard(board, { includeGenericHtml, requestTimeoutMs });
+    } catch (error) {
+      log.warning('Board fetch failed', {
+        domain: board.domain ?? null,
+        board_url: board.board_url ?? null,
+        error: String(error?.message ?? error),
+      });
+      failedBoards.push({
+        domain: board.domain ?? null,
+        ats_provider: board.ats_provider ?? null,
+        board_url: board.board_url ?? null,
+        reason: 'fetch_failed',
+        error: String(error?.message ?? error),
+      });
+      await sleep(requestDelayMs);
+      continue;
+    }
+
     if (!jobs.length) {
       failedBoards.push({
         domain: board.domain ?? null,

@@ -64,6 +64,12 @@ def normalize_email(email: str) -> str | None:
     host = repair_domain(host)
     if host.split(".")[-1] not in VALID_TLDS or host in BLOCKED_EMAIL_DOMAINS:
         return None
+    # A local part that is empty once plus-addressing is stripped ("+hn@x.com")
+    # is a capture artifact from surrounding text, not a real mailbox.
+    if not local or not local.split("+", 1)[0]:
+        return None
+    if not re.match(r"^[a-z0-9][a-z0-9._%+-]*$", local):
+        return None
     return f"{local}@{host}"
 
 

@@ -14,6 +14,42 @@ const CAREERS_PATHS = [
   '/company/careers',
 ];
 
+// Board URLs are harvested from a[href], iframe[src] and script[src], so an
+// embed widget such as .../embed.js yields a "token" of "embed" or "js". These
+// path segments are never a company board slug.
+const RESERVED_BOARD_TOKENS = new Set([
+  'js', 'css', 'json', 'api', 'embed', 'embeds', 'widget', 'widgets',
+  'static', 'assets', 'cdn', 'img', 'images', 'fonts', 'script', 'scripts',
+  'style', 'styles', 'dist', 'build', 'public', 'favicon', 'robots',
+]);
+
+const ASSET_EXTENSION_PATTERN = /\.(js|mjs|css|json|map|png|jpe?g|svg|gif|ico|woff2?|txt|xml)$/i;
+
+function isValidBoardToken(token) {
+  if (!token || token.length < 2) {
+    return false;
+  }
+  if (ASSET_EXTENSION_PATTERN.test(token)) {
+    return false;
+  }
+  if (RESERVED_BOARD_TOKENS.has(token)) {
+    return false;
+  }
+  return /^[a-z0-9][a-z0-9._-]*$/.test(token);
+}
+
+// A board reached through an outbound link may belong to a VC, parent, or
+// partner rather than this company. We cannot tell a rebrand from a third party
+// automatically, so record the mismatch and let the backend route it to review.
+function boardTokenMatchesDomain(token, domain) {
+  const slug = String(token || '').replace(/[^a-z0-9]/g, '');
+  const host = String(domain || '').split('.')[0].replace(/[^a-z0-9]/g, '');
+  if (!slug || !host) {
+    return false;
+  }
+  return slug.includes(host) || host.includes(slug) || slug.slice(0, 5) === host.slice(0, 5);
+}
+
 const PROVIDERS = {
   greenhouse: {
     hostPatterns: ['boards.greenhouse.io', 'job-boards.greenhouse.io'],
@@ -230,6 +266,7 @@ function detectProviderBoards(page, { companyId, domain, checkedUrls }) {
       raw_evidence: {
         collector: 'ats-board-detector',
         detection_method: page.url === provider.boardUrl ? 'direct_board_url' : 'page_link',
+        token_matches_domain: boardTokenMatchesDomain(provider.token, domain),
         matched_url: url,
         checked_urls: checkedUrls,
         page_status: page.status,
@@ -255,14 +292,18 @@ function providerFromUrl(value) {
     if (!config.hostPatterns.includes(hostname)) {
       continue;
     }
-    const token = pathParts[config.pathTokenIndex];
-    if (!token) {
+    const rawToken = pathParts[config.pathTokenIndex];
+    if (!rawToken) {
+      continue;
+    }
+    const token = decodeURIComponent(rawToken).toLowerCase();
+    if (!isValidBoardToken(token)) {
       continue;
     }
     return {
       name,
-      token: decodeURIComponent(token).toLowerCase(),
-      boardUrl: `${url.protocol}//${hostname}/${token}`,
+      token,
+      boardUrl: `${url.protocol}//${hostname}/${rawToken}`,
     };
   }
 

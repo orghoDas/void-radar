@@ -698,6 +698,8 @@ def job_signals(record: JobPostingRecord) -> list[dict]:
 
 
 def stale_role_signal(record: JobPostingRecord) -> dict | None:
+    if is_non_technical_title(record.title):
+        return None
     if not is_relevant_role_text(role_title_text(record)):
         return None
 
@@ -727,6 +729,8 @@ def stale_role_signal(record: JobPostingRecord) -> dict | None:
 
 
 def tech_stack_need_signal(record: JobPostingRecord) -> dict | None:
+    if is_non_technical_title(record.title):
+        return None
     if not is_relevant_role_text(role_title_text(record)):
         return None
 
@@ -748,6 +752,9 @@ def tech_stack_need_signal(record: JobPostingRecord) -> dict | None:
 
 
 def operations_software_need_signal(record: JobPostingRecord) -> dict | None:
+    if is_non_technical_title(record.title):
+        return None
+
     text_value = job_text(record)
     matched_terms = matched_keywords(text_value, OPERATIONS_NEED_TERMS)
     if not matched_terms:
@@ -949,6 +956,33 @@ def job_text(record: JobPostingRecord) -> str:
         )
         if value
     ).lower()
+
+
+# Some companies file non-technical roles under an Engineering department, so a
+# department check cannot catch these. A title that is unambiguously a
+# non-building role vetoes the signal regardless of department. Deliberately
+# excludes "sales engineer" and "solutions engineer", which are technical.
+NON_TECHNICAL_TITLE_TERMS = (
+    "account executive",
+    "account manager",
+    "business development",
+    "sales development",
+    "sales representative",
+    "underwriter",
+    "controller",
+    "recruiter",
+    "talent partner",
+    "social media",
+    "office manager",
+    "executive assistant",
+    "paralegal",
+    "bookkeeper",
+)
+
+
+def is_non_technical_title(title: str | None) -> bool:
+    lowered = (title or "").lower()
+    return any(term in lowered for term in NON_TECHNICAL_TITLE_TERMS)
 
 
 def role_title_text(record: JobPostingRecord) -> str:

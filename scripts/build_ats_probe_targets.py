@@ -22,6 +22,11 @@ VALID_TLDS = IANA_TLDS
 
 # Hosts that are never the prospect's own company domain.
 NON_COMPANY_HOSTS = {
+    # Job aggregators link out to hundreds of other companies' boards. Probing
+    # one makes it appear to own every board it lists.
+    "whoishiringjobs.com", "weworkremotely.com", "remoteok.com", "otta.com",
+    "wellfound.com", "angel.co", "builtin.com", "dice.com", "indeed.com",
+    "glassdoor.com", "ziprecruiter.com", "simplyhired.com", "jobs.lever.co",
     "bit.ly", "lnkd.in", "youtu.be", "youtube.com", "grnh.se",
     "arxiv.org", "techcrunch.com", "crunchbase.com", "themuse.com",
     "github.com", "github.io", "gitlab.com", "medium.com",
@@ -96,7 +101,8 @@ QUERY = text(
       and c.canonical_domain <> ''
       and exists (
         select 1 from signals g
-        where g.company_id = c.id and g.signal_type = 'HIRING_DISCOVERY'
+        where g.company_id = c.id
+          and g.signal_type in ('HIRING_DISCOVERY', 'FUNDING_EVENT')
       )
     order by c.canonical_domain
     """

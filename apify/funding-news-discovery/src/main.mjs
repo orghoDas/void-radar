@@ -20,6 +20,26 @@ const BLOCKED_DOMAINS = new Set([
   'instagram.com',
   'medium.com',
   'substack.com',
+  // Article pages embed analytics, CDN and consent scripts. Their hosts appear
+  // before the company's own link and get captured as the company domain.
+  'googletagmanager.com',
+  'google-analytics.com',
+  'googleapis.com',
+  'gstatic.com',
+  'doubleclick.net',
+  'cloudflare.com',
+  'cloudfront.net',
+  'cookiebot.com',
+  'onetrust.com',
+  'hotjar.com',
+  'segment.com',
+  'sentry.io',
+  'gravatar.com',
+  'wp.com',
+  'w3.org',
+  'schema.org',
+  'archive.org',
+  'bit.ly',
 ]);
 
 await Actor.main(async () => {

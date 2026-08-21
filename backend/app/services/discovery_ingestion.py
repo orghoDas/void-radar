@@ -301,6 +301,10 @@ def signal_type_for_record(record: DiscoverySourceRecord) -> str | None:
         return "HIRING_DISCOVERY"
     if event_type in {"discovery", "company_discovery"}:
         return "DISCOVERY"
+    # A published tender is a budgeted, dated intent to buy - the strongest
+    # discovery-time signal available, so it must not fall through to None.
+    if event_type in {"procurement_notice", "tender", "procurement"}:
+        return "PROCUREMENT_NOTICE"
     return None
 
 
@@ -311,6 +315,8 @@ def signal_confidence(signal_type: str) -> float:
         return 0.75
     if signal_type == "HIRING_DISCOVERY":
         return 0.85
+    if signal_type == "PROCUREMENT_NOTICE":
+        return 0.9
     return 0.6
 
 

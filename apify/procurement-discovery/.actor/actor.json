@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "procurement-discovery",
+  "title": "Procurement Discovery",
+  "description": "Collects published software and IT tenders from public procurement portals as Segment C discovery records.",
+  "version": "0.1.0",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}
