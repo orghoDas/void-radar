@@ -125,6 +125,20 @@ def make_client() -> tuple[TestClient, Session]:
         connection.execute(
             text(
                 """
+                create table company_classification (
+                    id text primary key,
+                    company_id text not null,
+                    company_type text not null,
+                    builds_software text not null default 'unknown',
+                    sector text,
+                    confidence numeric default 0
+                )
+                """
+            )
+        )
+        connection.execute(
+            text(
+                """
                 create table scores (
                     id text primary key,
                     company_id text not null,
@@ -415,3 +429,156 @@ def test_large_company_without_engineering_org_is_not_disqualified() -> None:
     assert response.status_code == 201
     body = response.json()
     assert body["disqualified"] is False
+
+
+def test_public_body_buying_consultancy_is_not_a_competitor() -> None:
+    """Procurement descriptions say what a buyer wants, not what it is.
+
+    Matching competitor terms against the tender text disqualified the Ministry
+    of Defence, Northumbria University and the National Audit Office.
+    """
+    client, db = make_client()
+
+    db.execute(
+        text(
+            """
+            insert into companies (
+                id, canonical_name, canonical_domain, description, industry,
+                created_at, updated_at
+            ) values (
+                'company-public-body', 'Northumbria University',
+                'northumbria.ac.uk',
+                'Tender for the provision of digital agency and IT consultancy services.',
+                'Education', current_timestamp, current_timestamp
+            )
+            """
+        )
+    )
+    db.commit()
+
+    response = client.post("/scoring/companies/company-public-body", json={})
+
+    assert response.status_code == 201
+    body = response.json()
+    assert "Agency/consultancy competitor." not in body["penalties"]
+    assert body["disqualified"] is False
+
+
+def test_repeat_software_buyer_outranks_one_off_buyer() -> None:
+    """A standing buyer is stronger evidence than a single tender."""
+    client, db = make_client()
+
+    for company_id, name, domain, tenders in (
+        ("company-repeat", "Repeat Buyer Council", "repeat-council.gov.uk", 8),
+        ("company-oneoff", "One Off Council", "oneoff-council.gov.uk", 1),
+    ):
+        db.execute(
+            text(
+                """
+                insert into companies (
+                    id, canonical_name, canonical_domain, industry,
+                    created_at, updated_at
+                ) values (
+                    :id, :name, :domain, 'Local government',
+                    current_timestamp, current_timestamp
+                )
+                """
+            ),
+            {"id": company_id, "name": name, "domain": domain},
+        )
+        for index in range(tenders):
+            db.execute(
+                text(
+                    """
+                    insert into signals (
+                        id, company_id, signal_type, description, source,
+                        source_url, detected_at, confidence, raw_evidence,
+                        created_at
+                    ) values (
+                        :sid, :cid, 'PROCUREMENT_HISTORY', 'Software tender',
+                        'uk_contracts_finder', 'https://example.gov.uk/notice',
+                        current_timestamp, 0.65, '{}', current_timestamp
+                    )
+                    """
+                ),
+                {"sid": f"{company_id}-{index}", "cid": company_id},
+            )
+    db.commit()
+
+    repeat = client.post("/scoring/companies/company-repeat", json={}).json()
+    oneoff = client.post("/scoring/companies/company-oneoff", json={}).json()
+
+    assert repeat["intent_score"] > oneoff["intent_score"]
+    assert any("Repeat software buyer" in r for r in repeat["positive_reasons"])
+    assert not any("Repeat software buyer" in r for r in oneoff["positive_reasons"])
+
+
+def test_classified_software_vendor_is_disqualified() -> None:
+    """The classifier verdict is what excludes builders under plan v3."""
+    client, db = make_client()
+
+    db.execute(
+        text(
+            """
+            insert into companies (
+                id, canonical_name, canonical_domain, industry,
+                created_at, updated_at
+            ) values (
+                'company-vendor', 'Devtools Inc', 'devtools-inc.com', 'Logistics',
+                current_timestamp, current_timestamp
+            )
+            """
+        )
+    )
+    db.execute(
+        text(
+            """
+            insert into company_classification (
+                id, company_id, company_type, builds_software, sector, confidence
+            ) values (
+                'cls-1', 'company-vendor', 'software_vendor', 'true',
+                'developer tools', 0.9
+            )
+            """
+        )
+    )
+    db.commit()
+
+    body = client.post("/scoring/companies/company-vendor", json={}).json()
+    assert body["disqualified"] is True
+    assert any("software_vendor" in p for p in body["penalties"])
+
+
+def test_classified_non_technical_buyer_is_rewarded() -> None:
+    client, db = make_client()
+
+    db.execute(
+        text(
+            """
+            insert into companies (
+                id, canonical_name, canonical_domain, industry,
+                created_at, updated_at
+            ) values (
+                'company-buyer', 'Huddinge kommun', 'huddinge.se', NULL,
+                current_timestamp, current_timestamp
+            )
+            """
+        )
+    )
+    db.execute(
+        text(
+            """
+            insert into company_classification (
+                id, company_id, company_type, builds_software, sector, confidence
+            ) values (
+                'cls-2', 'company-buyer', 'non_technical_buyer', 'false',
+                'municipality', 0.85
+            )
+            """
+        )
+    )
+    db.commit()
+
+    body = client.post("/scoring/companies/company-buyer", json={}).json()
+    assert body["disqualified"] is False
+    assert any("non-technical buyer" in r for r in body["positive_reasons"])

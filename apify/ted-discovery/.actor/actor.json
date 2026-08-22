@@ -1,0 +1,9 @@
+{
+  "actorSpecification": 1,
+  "name": "ted-discovery",
+  "title": "TED Discovery",
+  "description": "Collects EU software and IT tenders from TED (Tenders Electronic Daily) as Segment C discovery records.",
+  "version": "0.1.0",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

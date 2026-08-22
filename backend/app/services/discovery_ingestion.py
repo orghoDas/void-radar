@@ -305,6 +305,10 @@ def signal_type_for_record(record: DiscoverySourceRecord) -> str | None:
     # discovery-time signal available, so it must not fall through to None.
     if event_type in {"procurement_notice", "tender", "procurement"}:
         return "PROCUREMENT_NOTICE"
+    # A closed tender is not a current opportunity, but it proves the
+    # organisation buys software and does not build it.
+    if event_type in {"procurement_history", "past_tender"}:
+        return "PROCUREMENT_HISTORY"
     return None
 
 
@@ -317,6 +321,8 @@ def signal_confidence(signal_type: str) -> float:
         return 0.85
     if signal_type == "PROCUREMENT_NOTICE":
         return 0.9
+    if signal_type == "PROCUREMENT_HISTORY":
+        return 0.65
     return 0.6
 
 

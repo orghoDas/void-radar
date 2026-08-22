@@ -110,6 +110,15 @@ class OpenRouterClient:
         except (KeyError, IndexError) as error:
             raise LlmError(f"Unexpected OpenRouter response shape: {body}") from error
 
+        # content is null when the model refuses, hits a length cap, or returns
+        # tool calls instead of text. Raise so the caller can skip this record
+        # rather than letting a TypeError abort the whole batch.
+        if not isinstance(content, str):
+            finish = (body.get("choices") or [{}])[0].get("finish_reason")
+            raise LlmError(
+                f"Model returned no text content (finish_reason={finish!r})"
+            )
+
         try:
             parsed = json.loads(content)
         except json.JSONDecodeError as error:

@@ -1,7 +1,26 @@
 import { Actor, log } from 'apify';
 
-const OCDS_SEARCH = 'https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search';
-const NOTICE_BASE = 'https://www.contractsfinder.service.gov.uk/Notice/';
+// Both UK portals publish OCDS, but they differ in endpoint, query params and
+// - critically - where CPV codes live. Find a Tender leaves
+// tender.classification empty on ~76% of releases and puts the code under
+// tender.items[].additionalClassifications, so reading only the Contracts
+// Finder path returns zero records silently.
+const PORTALS = {
+  contracts_finder: {
+    source: 'uk_contracts_finder',
+    sourceName: 'UK Contracts Finder',
+    searchUrl: 'https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search',
+    params: { stages: 'tender', limit: '100' },
+    noticeBase: 'https://www.contractsfinder.service.gov.uk/Notice/',
+  },
+  find_a_tender: {
+    source: 'uk_find_a_tender',
+    sourceName: 'UK Find a Tender',
+    searchUrl: 'https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages',
+    params: { limit: '100' },
+    noticeBase: 'https://www.find-tender.service.gov.uk/notice/',
+  },
+};
 
 // Buyers publish through e-sourcing intermediaries, so the contact address is
 // often the portal's rather than the organisation's. Those hosts are never the
@@ -25,8 +44,15 @@ await Actor.main(async () => {
     ? input.cpvPrefixes.map(String)
     : ['72', '48'];
   const requestDelayMs = Number(input.requestDelayMs ?? 600);
+  const portalKey = String(input.portal ?? 'contracts_finder');
+  const portal = PORTALS[portalKey];
+  if (!portal) {
+    throw new Error(`Unknown portal "${portalKey}". Known: ${Object.keys(PORTALS).join(', ')}`);
+  }
 
-  log.info('Starting procurement discovery', { maxItems, pages, cpvPrefixes });
+  log.info('Starting procurement discovery', {
+    portal: portalKey, maxItems, pages, cpvPrefixes,
+  });
 
   const records = [];
   const skipped = { no_domain: 0, not_software: 0, portal_only: 0 };
@@ -39,14 +65,18 @@ await Actor.main(async () => {
     if (cursor) {
       url = new URL(cursor);
     } else {
-      url = new URL(OCDS_SEARCH);
-      url.searchParams.set('stages', 'tender');
-      url.searchParams.set('limit', '100');
+      url = new URL(portal.searchUrl);
+      for (const [key, value] of Object.entries(portal.params)) {
+        url.searchParams.set(key, value);
+      }
     }
 
     let payload;
     try {
-      const response = await fetch(url, { headers: { Accept: 'application/json' } });
+      const response = await fetchWithTimeout(url, {
+        headers: { Accept: 'application/json' },
+        timeoutMs: Number(input.requestTimeoutMs ?? 30000),
+      });
       if (!response.ok) {
         log.warning('Search request failed', { status: response.status });
         break;
@@ -62,7 +92,7 @@ await Actor.main(async () => {
 
     for (const release of releases) {
       if (records.length >= maxItems) break;
-      const record = standardizeRelease(release, cpvPrefixes, skipped);
+      const record = standardizeRelease(release, cpvPrefixes, skipped, portal);
       if (record) records.push(record);
     }
 
@@ -76,9 +106,13 @@ await Actor.main(async () => {
   log.info('Procurement discovery finished', { recordsOutput: records.length, skipped });
 });
 
-function standardizeRelease(release, cpvPrefixes, skipped) {
+function standardizeRelease(release, cpvPrefixes, skipped, portal) {
   const tender = release.tender ?? {};
-  if (!matchesCpv(tender, cpvPrefixes)) {
+  const cpvCodes = collectCpvCodes(tender);
+  const matchedCpvCodes = cpvCodes.filter((code) => (
+    cpvPrefixes.some((prefix) => code.startsWith(prefix))
+  ));
+  if (!matchedCpvCodes.length) {
     skipped.not_software += 1;
     return null;
   }
@@ -96,17 +130,21 @@ function standardizeRelease(release, cpvPrefixes, skipped) {
 
   const value = tender.value ?? {};
   const deadline = tender.tenderPeriod?.endDate ?? null;
-  const sourceUrl = `${NOTICE_BASE}${encodeURIComponent(release.ocid ?? release.id ?? '')}`;
+  const sourceUrl = `${portal.noticeBase}${encodeURIComponent(release.ocid ?? release.id ?? '')}`;
 
   return {
-    source: 'uk_contracts_finder',
+    source: portal.source,
     source_record_id: String(release.ocid ?? release.id),
     source_url: sourceUrl,
     company_name: buyerName,
     website: `https://${domain}`,
     domain,
     location: parties[0]?.address?.locality ?? null,
-    industry: tender.classification?.description ?? null,
+    industry: classificationDescription(tender, matchedCpvCodes)
+      ?? tender.classification?.description
+      ?? tender.items?.[0]?.additionalClassifications?.[0]?.description
+      ?? null,
+    organisation_type: organisationType(parties),
     event_type: 'procurement_notice',
     event_date: (tender.datePublished ?? release.date ?? '').slice(0, 10) || null,
     event_summary: [
@@ -123,6 +161,8 @@ function standardizeRelease(release, cpvPrefixes, skipped) {
       collector: 'procurement-discovery',
       ocid: release.ocid ?? null,
       classification: tender.classification ?? null,
+      cpv_codes: cpvCodes,
+      matched_cpv_codes: matchedCpvCodes,
       value,
       tender_period: tender.tenderPeriod ?? null,
       procurement_method: tender.procurementMethodDetails ?? null,
@@ -130,12 +170,58 @@ function standardizeRelease(release, cpvPrefixes, skipped) {
   };
 }
 
-function matchesCpv(tender, cpvPrefixes) {
+function collectCpvCodes(tender) {
   const codes = [
     tender.classification?.id,
     ...(tender.additionalClassifications ?? []).map((entry) => entry?.id),
-  ].filter(Boolean).map(String);
-  return codes.some((code) => cpvPrefixes.some((prefix) => code.startsWith(prefix)));
+  ];
+  for (const item of tender.items ?? []) {
+    codes.push(item?.classification?.id);
+    for (const extra of item?.additionalClassifications ?? []) {
+      codes.push(extra?.id);
+    }
+  }
+  return codes.filter(Boolean).map(String);
+}
+
+async function fetchWithTimeout(url, { timeoutMs, ...options }) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function classificationDescription(tender, matchedCpvCodes) {
+  const descriptions = [
+    tender.classification,
+    ...(tender.additionalClassifications ?? []),
+  ];
+  for (const item of tender.items ?? []) {
+    descriptions.push(item?.classification);
+    descriptions.push(...(item?.additionalClassifications ?? []));
+  }
+  for (const entry of descriptions) {
+    if (entry?.id && matchedCpvCodes.includes(String(entry.id)) && entry.description) {
+      return entry.description;
+    }
+  }
+  return null;
+}
+
+// Find a Tender states what kind of organisation the buyer is. That is better
+// evidence of "non-technical buyer" than guessing from the name.
+function organisationType(parties) {
+  for (const party of parties ?? []) {
+    for (const entry of party?.details?.classifications ?? []) {
+      if (entry?.scheme === 'UK_CA_TYPE' && entry?.description) {
+        return String(entry.description);
+      }
+    }
+  }
+  return null;
 }
 
 function buyerDomain(parties, skipped) {

@@ -105,9 +105,9 @@ Measured on 2026-08-21, not assumed:
 | --- | --- | --- | --- |
 | UK Find a Tender | 200 | **2 per 100 releases** | none |
 | UK Contracts Finder | 200 | 3 per ~12,000 | none |
-| Public Contracts Scotland | 200 | unmapped | none |
-| EU TED | 200 | untested, high volume | none |
-| Sell2Wales | **500** | n/a | none |
+| EU TED | 200 | **6,409 in 45 days** | none |
+| Public Contracts Scotland | 200 | **1 software notice per 69** | none |
+| Sell2Wales | no working API | n/a | n/a |
 
 ### What we scrape
 
@@ -356,3 +356,32 @@ GATE  A person outside this project can use the sheet without explanation.
 - Expensive operations are gated behind cheap filters.
 - Every contact records where it came from.
 - Suppression is applied even though we do not send.
+
+
+---
+
+## Appendix - Phase B R&D outcomes (2026-08-21)
+
+**Find a Tender: built.** 9 live software tenders from 44 records, against
+Contracts Finder's 3 from 422. Also publishes buyer organisation type
+(`Public authority - central government`), which is better evidence of buyer
+type than inferring from the name.
+
+**EU TED: built.** 400 records, 34 live, 100% carrying a contact email, across
+27 countries. Three API quirks cost time and are worth recording:
+CPV prefixes are rejected so full codes are required; `organisation-town-buyer`
+is not a valid field and one bad field name 400s the whole request; buyer names
+are multilingual maps needing English-preferred extraction.
+
+**Public Contracts Scotland: deprioritised, not built.** The API responds, but
+returns 69 notices regardless of date range and only 1 of those was software
+classified. Volume does not justify an adapter while TED is unexploited.
+
+**Sell2Wales: no public API.** `api.sell2wales.gov.wales` returns 500 and
+`www.sell2wales.gov.wales/api/v1/Notices` returns an HTML error page, not JSON.
+A 200 status here means a rendered error, not a working endpoint.
+
+**Portal blocklist extended to 18 national e-procurement hosts**
+(`marches-publics.gouv.fr`, `tenderned.nl`, `platformazakupowa.pl` and others).
+Buyers publish through intermediaries, so without this the portals themselves
+become the top-ranked prospects.

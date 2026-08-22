@@ -62,22 +62,54 @@ TARGET_INDUSTRY_TERMS = (
     "nhs",
 )
 
+# Matched against company identity only, never against description. For a
+# procurement-sourced company the description is the tender text, so a council
+# buying consultancy would otherwise be scored as being a consultancy.
+# Terms are multi-word for the same reason: bare "agency" matches the Ministry
+# of Defence and the Environment Agency, which are buyers.
 COMPETITOR_TERMS = (
-    "agency",
-    "consultancy",
-    "consulting",
+    "digital agency",
+    "software agency",
+    "web agency",
+    "creative agency",
+    "marketing agency",
+    "dev agency",
+    "development agency",
+    "software consultancy",
+    "it consultancy",
+    "tech consultancy",
     "software development shop",
     "web development agency",
-    "studio",
+    "design studio",
+    "development studio",
+)
+
+# Public bodies are buyers by definition and can never be the competitor set.
+PUBLIC_BODY_TERMS = (
+    "council", "university", "college", "school", "nhs", "ministry",
+    "government", "authority", "constabulary", "police", "fire and rescue",
+    "ambulance", "hospital", "trust", "library", "museum", "borough",
+    "county", "district", "national", "royal", "department for",
+    "department of", "office for", "office of", "agency",
 )
 
 CRYPTO_TERMS = ("crypto", "web3", "blockchain", "nft", "defi")
 FREE_MAIL_DOMAINS = {"gmail.com", "yahoo.com", "hotmail.com", "outlook.com"}
 
+# An organisation that has run many software tenders is a standing buyer, not
+# an accident. The base intent formula takes max + a quarter of the next three,
+# so 13 tenders and 4 tenders score almost identically without this.
+PROCUREMENT_SIGNAL_TYPES = ("PROCUREMENT_NOTICE", "PROCUREMENT_HISTORY")
+REPEAT_BUYER_BONUS_PER_TENDER = 5
+REPEAT_BUYER_BONUS_CAP = 25
+
 SIGNAL_INTENT_WEIGHTS = {
     # A published tender states a budget and a deadline outright, which is a
     # stronger intent claim than an inferred one.
     "PROCUREMENT_NOTICE": 90,
+    # Bought software before, nothing open now: real evidence of buyer type,
+    # weaker evidence of current timing.
+    "PROCUREMENT_HISTORY": 40,
     "STALE_ENGINEERING_ROLE": 85,
     "AGING_ENGINEERING_ROLE": 68,
     "HIRING_SPIKE": 78,
@@ -181,6 +213,24 @@ def score_company(
 
 
 
+def company_classification(db: Session, company_id: str) -> tuple[str, str | None] | None:
+    """Model verdict on whether this company builds software or buys it.
+
+    Reads a stored verdict only; classification never runs inside scoring, so a
+    re-score is deterministic and free.
+    """
+    row = db.execute(
+        text(
+            """
+            select company_type, sector from company_classification
+            where company_id = :company_id limit 1
+            """
+        ),
+        {"company_id": company_id},
+    ).first()
+    return (str(row[0]), row[1]) if row else None
+
+
 def github_small_footprint_signal(db: Session, company_id: str) -> bool:
     """Confirmed absence of a public engineering org is positive evidence."""
     row = db.execute(
@@ -230,6 +280,16 @@ def calculate_fit_score(
             company.get("country"),
             company.get("city"),
             company.get("company_stage"),
+        )
+    ).lower()
+
+    # What the company IS, as opposed to what a tender says it wants to buy.
+    identity_text = " ".join(
+        str(value or "")
+        for value in (
+            company.get("canonical_name"),
+            company.get("canonical_domain"),
+            company.get("industry"),
         )
     ).lower()
 
@@ -301,11 +361,29 @@ def calculate_fit_score(
             "GitHub shows no substantial in-house engineering footprint."
         )
 
-    if matched_terms(company_text, COMPETITOR_TERMS):
+    classification = company_classification(db, company["id"])
+    if classification:
+        verdict, sector = classification
+        if verdict in {"software_vendor", "agency"}:
+            score -= 40
+            context.add_penalty(
+                f"Classified as {verdict}: builds software rather than buying it.",
+                disqualifying=True,
+            )
+        elif verdict == "non_technical_buyer":
+            score += 20
+            label = f" ({sector})" if sector else ""
+            context.positive_reasons.append(
+                f"Classified as a non-technical buyer{label}."
+            )
+
+    if matched_terms(identity_text, COMPETITOR_TERMS) and not matched_terms(
+        identity_text, PUBLIC_BODY_TERMS
+    ):
         score -= 35
         context.add_penalty("Agency/consultancy competitor.", disqualifying=True)
 
-    crypto_matches = matched_terms(company_text, CRYPTO_TERMS)
+    crypto_matches = matched_terms(identity_text, CRYPTO_TERMS)
     if crypto_matches and not matched_industries:
         score -= 25
         context.add_penalty("Crypto-only or unclear business.", disqualifying=True)
@@ -355,6 +433,20 @@ def calculate_intent_score(signals: list[dict], context: ScoreContext) -> int:
     primary = max(contributions)
     secondary = sum(sorted(contributions, reverse=True)[1:4])
     score = min(100, primary + round(secondary * 0.25))
+
+    tender_count = sum(
+        1 for signal in signals
+        if str(signal["signal_type"]) in PROCUREMENT_SIGNAL_TYPES
+    )
+    if tender_count > 1:
+        bonus = min(
+            REPEAT_BUYER_BONUS_CAP,
+            (tender_count - 1) * REPEAT_BUYER_BONUS_PER_TENDER,
+        )
+        score = min(100, score + bonus)
+        context.positive_reasons.append(
+            f"Repeat software buyer: {tender_count} tenders on record."
+        )
 
     if seen_signal_types & TECH_SIGNAL_TYPES:
         context.positive_reasons.append("Company has technical/product hiring intent.")

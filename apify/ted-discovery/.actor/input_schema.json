@@ -1,0 +1,13 @@
+{
+  "title": "TED Discovery Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "maxItems": { "title": "Maximum records", "type": "integer", "default": 250, "minimum": 1, "maximum": 2000 },
+    "daysBack": { "title": "Publication window (days)", "type": "integer", "default": 30, "minimum": 1, "maximum": 365 },
+    "cpvCodes": { "title": "CPV codes", "type": "array", "description": "Full CPV codes; TED rejects prefixes.", "editor": "json", "default": ["72000000","72200000","72300000","72500000","48000000","48800000"] },
+    "countries": { "title": "Country filter", "type": "array", "description": "ISO3 codes, empty for all.", "editor": "json", "default": [] },
+    "requestDelayMs": { "title": "Request delay", "type": "integer", "default": 600, "minimum": 0, "maximum": 10000 }
+  },
+  "required": []
+}
